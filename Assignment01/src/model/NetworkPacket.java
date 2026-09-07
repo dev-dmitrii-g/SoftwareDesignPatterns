@@ -5,8 +5,8 @@ import java.net.InetAddress;
 public class NetworkPacket {
     private final InetAddress sourceIP;
     private final InetAddress destinationIP;
-    private final int sourcePort;
-    private final int destinationPort;
+    private final Integer sourcePort;
+    private final Integer destinationPort;
     private final Protocol protocol;
     private final String payload;
 
@@ -27,11 +27,11 @@ public class NetworkPacket {
         return destinationIP;
     }
 
-    public int getSourcePort() {
+    public Integer getSourcePort() {
         return sourcePort;
     }
 
-    public int getDestinationPort() {
+    public Integer getDestinationPort() {
         return destinationPort;
     }
 
