@@ -12,6 +12,10 @@ class Magby extends Pokemon {
 
     @Override
     public void attack(Pokemon pokemon) {
+        if (this.isFainted()) {
+            return;
+        }
+        
         System.out.println("<\\-MOVE-/> " + this.name + " attacks " + pokemon.name + " with EMBER!\n");
         pokemon.takeDamage(this.attack);
     }

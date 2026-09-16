@@ -35,6 +35,10 @@ public abstract class Pokemon {
         this.fainted = true;
     }
 
+    public boolean isFainted() {
+        return this.fainted;
+    }
+
     public void stats() {
         System.out.println(
                 "NAME: " + this.name + "\n"

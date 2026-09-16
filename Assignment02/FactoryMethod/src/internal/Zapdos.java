@@ -12,6 +12,10 @@ class Zapdos extends Pokemon {
 
     @Override
     public void attack(Pokemon pokemon) {
+        if (this.isFainted()) {
+            return;
+        }
+
         System.out.println("<\\-MOVE-/> " + this.name + " zapped " + pokemon.name + " with THUNDER SHOCK!\n");
         pokemon.takeDamage(this.attack);
     }

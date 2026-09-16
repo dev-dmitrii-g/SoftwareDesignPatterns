@@ -12,6 +12,10 @@ class Slowbro extends Pokemon {
 
     @Override
     public void attack(Pokemon pokemon) {
+        if (this.isFainted()) {
+            return;
+        }
+
         System.out.println("<\\-MOVE-/> " + this.name + " struck " + pokemon.name + " with WATER PULSE!\n");
         pokemon.takeDamage(this.attack);
     }
