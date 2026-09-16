@@ -23,3 +23,17 @@ Declares the factory method alongside the business method:
 - `ZapdosFactory` - creates `Zapdos` pokemon
 ### 5. Client
 Can only interact with the `Pokemon Factory` abstractions. It spawns wild pokemon and runs battle interactions.
+## Part B. Abstract Factory
+### 1. Abstract Products
+- `Pokemon` - abstract product class that defines common state (name, type, hp, attack) and combat methods
+- `SpecialMove` - abstract product class that defines move execution and name getter
+### 2. Concrete Products
+- Fire family - `Magby` paired with `Ember`
+- Water family - `Slowbro` paired with `Water Pulse`
+- Electric family - `Zapdos` paired with `Thunder Shock`
+### 3. Abstract Factory 
+Abstract factory interface declaring creation methods for product families (`createPokemon()` and `createSpecialMove()`)
+### 4. Concrete Factories
+`FireFactory`, `WaterFactory`, `ElectricFactory` - concrete factories that implement the abstract factory interface
+### 5. Client Orchestration
+Client orchestrates the creation of pokemon and special moves using the abstract factory.
