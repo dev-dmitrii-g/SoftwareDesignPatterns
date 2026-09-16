@@ -1,5 +1,7 @@
 package internal;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public abstract class Pokemon {
     protected final String name;
     protected final Type type;
@@ -16,7 +18,13 @@ public abstract class Pokemon {
     }
 
     public abstract void speak();
-    public abstract void attack(Pokemon pokemon);
+    public void attack(Pokemon pokemon) {
+        if (this.fainted) {
+            return;
+        }
+        System.out.println("<\\-MOVE-/> " + this.name + " tackled " + pokemon.name + "!\n");
+        pokemon.takeDamage(this.attack / 3 + ThreadLocalRandom.current().nextInt(0, 10));
+    };
 
     protected void takeDamage(int damage) {
         if (this.fainted) {

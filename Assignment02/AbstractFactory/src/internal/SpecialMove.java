@@ -1,5 +1,6 @@
 package internal;
 
 public abstract class SpecialMove {
-    abstract void execute(Pokemon pokemon);
+    public abstract void execute(Pokemon user, Pokemon target);
+    public abstract String getName();
 }
