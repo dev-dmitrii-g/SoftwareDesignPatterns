@@ -15,27 +15,32 @@ public abstract class Pokemon {
         this.attack = attack;
     }
 
-    abstract void speak();
-    abstract void attack(Pokemon pokemon);
+    public abstract void speak();
+    public abstract void attack(Pokemon pokemon);
 
-    void takeDamage(int damage) {
+    protected void takeDamage(int damage) {
         if (this.fainted) {
-            System.out.println(this.name + " has fainted!");
+            System.out.println(this.name + " is already fainted!\n");
             return;
         }
         this.currentHp -= damage;
         if (this.currentHp <= 0) {
             this.currentHp = 0;
-            this.fainted = true;
+            faint();
         }
     }
 
-    void stats() {
+    private void faint() {
+        System.out.println(this.name + " has fainted!\n");
+        this.fainted = true;
+    }
+
+    public void stats() {
         System.out.println(
                 "NAME: " + this.name + "\n"
                 + "TYPE: " + this.type + "\n"
-                + "HP: " + this.maxHp + "/" + this.currentHp + "\n"
-                + "ATK: " + this.attack
+                + "HP: " + this.currentHp + "/" + this.maxHp + "\n"
+                + "ATK: " + this.attack + "\n"
         );
     }
 }
