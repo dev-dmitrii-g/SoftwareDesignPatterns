@@ -7,12 +7,12 @@ class Zapdos extends Pokemon {
 
     @Override
     public void speak() {
-        System.out.println(this.name + " says: ZAPDOS is a legendary bird POKéMON that has the ability to control electricity. It usually lives in thunderclouds. It gains power if it is stricken by lightning bolts!");
+        System.out.println(this.name + " says: ZAPDOS is a legendary bird POKéMON that has the ability to control electricity. It usually lives in thunderclouds. It gains power if it is stricken by lightning bolts!\n");
     }
 
     @Override
     public void attack(Pokemon pokemon) {
-        System.out.println(this.name + " zapped " + pokemon.name + " with THUNDER SHOCK!");
+        System.out.println("<\\-MOVE-/> " + this.name + " zapped " + pokemon.name + " with THUNDER SHOCK!\n");
         pokemon.takeDamage(this.attack);
     }
 }

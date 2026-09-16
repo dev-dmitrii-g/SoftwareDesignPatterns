@@ -7,12 +7,12 @@ class Slowbro extends Pokemon {
 
     @Override
     public void speak() {
-        System.out.println(this.name + " says: When a SLOWPOKE went hunting in the sea, its tail was bitten by a SHELLDER. That made it evolve into SLOWBRO!");
+        System.out.println(this.name + " says: When a SLOWPOKE went hunting in the sea, its tail was bitten by a SHELLDER. That made it evolve into SLOWBRO!\n");
     }
 
     @Override
     public void attack(Pokemon pokemon) {
-        System.out.println(this.name + " struck " + pokemon.name + " with WATER PULSE!");
+        System.out.println("<\\-MOVE-/> " + this.name + " struck " + pokemon.name + " with WATER PULSE!\n");
         pokemon.takeDamage(this.attack);
     }
 }

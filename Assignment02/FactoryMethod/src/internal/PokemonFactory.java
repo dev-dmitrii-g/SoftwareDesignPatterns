@@ -5,9 +5,11 @@ public abstract class PokemonFactory {
 
     public Pokemon spawn() {
         Pokemon pokemon = createPokemon();
-        System.out.println("A wild " + createPokemon().name + " appeared!");
+        System.out.println("<\\|/-----------------<\\--\\|/--/>----------------\\|/>\n");
+        System.out.println("A wild " + createPokemon().name + " appeared!\n");
         pokemon.stats();
         pokemon.speak();
+        System.out.println("<\\|/-----------------<\\--\\|/--/>----------------\\|/>\n");
         return pokemon;
     }
 }
