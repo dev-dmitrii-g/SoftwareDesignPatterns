@@ -55,4 +55,8 @@ public abstract class Pokemon {
                 + "ATK: " + this.attack + "\n"
         );
     }
+
+    public String getName() {
+        return this.name;
+    }
 }

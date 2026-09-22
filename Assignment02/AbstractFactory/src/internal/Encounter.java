@@ -9,6 +9,10 @@ public class Encounter {
         this.specialMove = specialMove;
     }
 
+    public void performSpecialMove(Encounter targetEncounter) {
+        this.specialMove.execute(this.pokemon, targetEncounter.getPokemon());
+    }
+
     public Pokemon getPokemon() {
         return this.pokemon;
     }

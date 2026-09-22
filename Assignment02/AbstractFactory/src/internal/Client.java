@@ -7,7 +7,7 @@ public class Client {
         Encounter encounter = new Encounter(pokemon, specialMove);
 
         System.out.println("<\\|/-----------------<\\--\\|/--/>----------------\\|/>\n");
-        System.out.println("A wild " + pokemon.name + " appeared!\n");
+        System.out.println("A wild " + pokemon.getName() + " appeared!\n");
         pokemon.stats();
         System.out.println("Special Move: " + specialMove.getName() + "\n");
         pokemon.speak();
