@@ -11,7 +11,7 @@ public class HardwareDetector {
             case "CORP_ARASAKA_JP":
                 System.out.println("[SYSTEM] Verified ArasakaKernel [SYSTEM]");
                 return new ArasakaKernel();
-            case "ERR_UNKNOWN_UREGISTERED":
+            case "ERR_UNKNOWN_UNREGISTERED":
                 System.out.println("[WARNING] Unregistered Hardware Detected. Mounting Adapter... [WARNING]");
                 BlackMarketWiring hardware = new BlackMarketWiring();
                 return new BlackMarketAdapter(hardware);

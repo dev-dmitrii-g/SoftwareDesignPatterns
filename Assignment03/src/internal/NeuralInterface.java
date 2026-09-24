@@ -7,5 +7,5 @@ public abstract class NeuralInterface {
         this.firmware = firmware;
     }
 
-    abstract void triggerImplant();
+    public abstract void triggerImplant();
 }

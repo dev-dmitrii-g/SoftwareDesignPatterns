@@ -6,7 +6,7 @@ public class SensoryAugmentation extends NeuralInterface {
     }
     @Override
     public void triggerImplant() {
-        System.out.println("\\...Activating-Sensory-Augmentation...//");
+        System.out.println("...Activating-Sensory-Augmentation...");
         NeuralPayload payload = new NeuralPayload(NeuralPayload.TargetRegion.OPTIC_NERVE, 3, "AUTH_ENC_NIGHT_VISION");
         firmware.executeNeuralCommand(payload);
     }
