@@ -1,4 +1,6 @@
-package internal;
+package internal.implementor;
+
+import internal.exception.RejectionSyndromeException;
 
 public class ArasakaKernel implements ImplantFirmware {
     @Override

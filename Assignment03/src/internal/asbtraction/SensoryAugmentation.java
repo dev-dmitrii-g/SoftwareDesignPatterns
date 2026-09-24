@@ -1,4 +1,7 @@
-package internal;
+package internal.asbtraction;
+
+import internal.implementor.ImplantFirmware;
+import internal.implementor.NeuralPayload;
 
 public class SensoryAugmentation extends NeuralInterface {
     public SensoryAugmentation(ImplantFirmware firmware) {

@@ -1,9 +1,9 @@
 package tests;
 
-import internal.ImplantFirmware;
-import internal.NeuralInterface;
-import internal.NeuralPayload;
-import internal.SensoryAugmentation;
+import internal.implementor.ImplantFirmware;
+import internal.asbtraction.NeuralInterface;
+import internal.implementor.NeuralPayload;
+import internal.asbtraction.SensoryAugmentation;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.junit.jupiter.api.Assertions.*;

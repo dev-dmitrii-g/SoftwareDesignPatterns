@@ -1,4 +1,10 @@
-package internal;
+package internal.factory;
+
+import external.BlackMarketWiring;
+import internal.adapter.BlackMarketAdapter;
+import internal.implementor.ArasakaKernel;
+import internal.implementor.ImplantFirmware;
+import internal.implementor.MilitechOS;
 
 public class HardwareDetector {
     public static ImplantFirmware scanAndMount(String hardwareSignature) {
@@ -16,7 +22,9 @@ public class HardwareDetector {
                 BlackMarketWiring hardware = new BlackMarketWiring();
                 return new BlackMarketAdapter(hardware);
             default:
-                throw new IllegalArgumentException("[ERROR] Unrecognized Hardware. Cannot Mount. Aborting... [ERROR]");
+                System.out.println("[ERROR] Unrecognized Hardware. Cannot Mount. Aborting... [ERROR]");
+                System.exit(0);
+                return null;
         }
     }
 }

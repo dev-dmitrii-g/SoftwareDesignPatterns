@@ -1,4 +1,9 @@
-package internal;
+package internal.adapter;
+
+import external.BlackMarketWiring;
+import internal.implementor.NeuralPayload;
+import internal.exception.RejectionSyndromeException;
+import internal.implementor.ImplantFirmware;
 
 import java.nio.charset.StandardCharsets;
 

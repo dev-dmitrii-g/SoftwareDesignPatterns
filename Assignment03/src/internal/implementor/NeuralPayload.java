@@ -1,4 +1,4 @@
-package internal;
+package internal.implementor;
 
 public class NeuralPayload {
     public enum TargetRegion {

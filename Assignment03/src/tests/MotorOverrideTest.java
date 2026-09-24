@@ -1,6 +1,9 @@
 package tests;
 
-import internal.*;
+import internal.asbtraction.MotorOverride;
+import internal.asbtraction.NeuralInterface;
+import internal.implementor.NeuralPayload;
+import internal.implementor.ImplantFirmware;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.junit.jupiter.api.Assertions.*;

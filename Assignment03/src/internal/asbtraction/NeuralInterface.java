@@ -1,4 +1,6 @@
-package internal;
+package internal.asbtraction;
+
+import internal.implementor.ImplantFirmware;
 
 public abstract class NeuralInterface {
     ImplantFirmware firmware;

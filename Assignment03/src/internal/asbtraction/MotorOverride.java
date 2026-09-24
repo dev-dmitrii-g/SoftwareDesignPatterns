@@ -1,4 +1,7 @@
-package internal;
+package internal.asbtraction;
+
+import internal.implementor.NeuralPayload;
+import internal.implementor.ImplantFirmware;
 
 public class MotorOverride extends NeuralInterface {
     public MotorOverride(ImplantFirmware firmware) {

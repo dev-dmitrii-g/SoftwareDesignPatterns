@@ -1,9 +1,9 @@
 package tests;
 
-import internal.BlackMarketAdapter;
-import internal.BlackMarketWiring;
-import internal.NeuralPayload;
-import internal.RejectionSyndromeException;
+import internal.adapter.BlackMarketAdapter;
+import external.BlackMarketWiring;
+import internal.implementor.NeuralPayload;
+import internal.exception.RejectionSyndromeException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

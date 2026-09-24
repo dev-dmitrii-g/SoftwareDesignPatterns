@@ -1,4 +1,4 @@
-package internal;
+package external;
 
 public class BlackMarketWiring {
     public int shockSystem(float voltage, byte[] data) {
