@@ -1,0 +1,56 @@
+@startuml
+abstract class NeuralInterface {
+  # firmware : ImplantFirmware
+  + triggerImplant()
+}
+
+class SensoryAugmentation {
+  + triggerImplant()
+}
+
+class MotorOverride {
+  + triggerImplant()
+}
+
+interface ImplantFirmware {
+  + executeNeuralCommand(payload: NeuralPayload)
+}
+
+class MilitechOS {
+  + executeNeuralCommand(payload: NeuralPayload)
+}
+
+class ArasakaKernel {
+  + executeNeuralCommand(payload: NeuralPayload)
+}
+
+class ScrapWiringAdapter {
+  - scrapHardware : BlackMarketWiring
+  + executeNeuralCommand(payload: NeuralPayload)
+}
+
+class BlackMarketWiring {
+  + shockSystem(voltage: float, rawHexData: byte[]) : int
+}
+
+class NeuralPayload {
+  - region : TargetRegion
+  - intensity : int
+  - commandText : String
+}
+
+class HardwareDetector {
+  + scanAndMount(signature: String) : ImplantFirmware
+}
+
+NeuralInterface <|-- SensoryAugmentation
+NeuralInterface <|-- MotorOverride
+
+ImplantFirmware <|.. MilitechOS
+ImplantFirmware <|.. ArasakaKernel
+ImplantFirmware <|.. ScrapWiringAdapter
+
+NeuralInterface o-> ImplantFirmware : Bridge
+ScrapWiringAdapter --> BlackMarketWiring : Adapts
+ImplantFirmware .> NeuralPayload : Uses
+@enduml
