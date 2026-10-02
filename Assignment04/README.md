@@ -16,7 +16,7 @@ Start the local web server and open **http://127.0.0.1:8080**:
 go run . -db hospital.db serve
 ```
 
-The site has **Admissions** and **Stock** tabs. Admissions contains the form, admission table, and status details. Stock contains an editable stock table. A new database starts with five wheelchairs and five paracetamol units, so a normal admission can succeed immediately. To show an equipment failure, set wheelchair quantity to zero and create a new admission. To show a pharmacy failure, set wheelchair quantity above zero and paracetamol quantity to zero. The saved admission details show which steps were reversed. The page and CLI use the same `hospital.db` file. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN.
+The site has **Admissions** and **Stock** tabs. Admissions contains the form, admission table, and status details. Equipment and medicine are selected from the items in Stock. Stock has separate equipment and medicine tables where quantities can be changed and new items added. A new database starts with five wheelchairs and five paracetamol units, so a normal admission can succeed immediately. To show an equipment failure, set wheelchair quantity to zero and create a new admission. To show a pharmacy failure, set wheelchair quantity above zero and paracetamol quantity to zero. Items with zero quantity remain selectable so these failures can be shown. The saved admission details show which steps were reversed. The page and CLI use the same `hospital.db` file. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN.
 
 ## CLI
 

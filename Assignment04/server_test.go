@@ -127,4 +127,34 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 	if result.View.Admission.Status != admission.Completed || result.View.Pharmacy != pharmacy.Dispatched {
 		t.Fatalf("normal admission state: %+v", result.View)
 	}
+	post := func(path string, payload any) *httptest.ResponseRecorder {
+		t.Helper()
+		data, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req := httptest.NewRequest("POST", path, bytes.NewReader(data))
+		req.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, req)
+		return response
+	}
+	for _, item := range []map[string]any{
+		{"kind": "equipment", "name": "oxygen monitor", "quantity": 2},
+		{"kind": "pharmacy", "name": "ibuprofen", "quantity": 3},
+	} {
+		if response := post("/api/stock", item); response.Code != 200 {
+			t.Fatalf("add stock: %d %s", response.Code, response.Body.String())
+		}
+	}
+	response = post("/api/admissions", map[string]any{"action": "admit", "id": "A2", "iin": "990101123456", "policy": "P", "equipment": "oxygen monitor", "medicine": "ibuprofen"})
+	if response.Code != 200 {
+		t.Fatalf("custom stock admission: %d %s", response.Code, response.Body.String())
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result.View.Admission.Status != admission.Completed || result.View.Admission.Equipment != "oxygen monitor" || result.View.Admission.Medicine != "ibuprofen" {
+		t.Fatalf("custom stock state: %+v", result.View)
+	}
 }

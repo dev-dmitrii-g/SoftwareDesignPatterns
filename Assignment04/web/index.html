@@ -41,11 +41,11 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="equipment">Equipment</label>
-                  <input class="form-control" id="equipment" name="equipment" value="wheelchair" required>
+                  <select class="form-select" id="equipment" name="equipment" required><option value="">Choose equipment</option></select>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="medicine">Medicine</label>
-                  <input class="form-control" id="medicine" name="medicine" value="paracetamol" required>
+                  <select class="form-select" id="medicine" name="medicine" required><option value="">Choose medicine</option></select>
                 </div>
               </div>
               <div class="d-flex gap-2 mt-3">
@@ -93,35 +93,54 @@
       </section>
 
       <section id="panel-stock" class="d-none">
-        <div class="card mb-4">
-          <div class="card-body">
-            <h2 class="h5 mb-3">Stock</h2>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>Type</th><th>Name</th><th>Quantity</th><th></th></tr></thead>
-                <tbody id="stock-rows"><tr><td colspan="4" class="text-secondary">Loading</td></tr></tbody>
-              </table>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h5 mb-3">Equipment</h2>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle">
+                    <thead><tr><th>Name</th><th>Quantity</th><th></th></tr></thead>
+                    <tbody id="equipment-rows"><tr><td colspan="3" class="text-secondary">Loading</td></tr></tbody>
+                  </table>
+                </div>
+                <form id="equipment-form" class="row g-2 align-items-end mt-2">
+                  <div class="col-sm-6">
+                    <label class="form-label" for="equipment-name">New equipment</label>
+                    <input class="form-control" id="equipment-name" name="name" required>
+                  </div>
+                  <div class="col-sm-3">
+                    <label class="form-label" for="equipment-quantity">Quantity</label>
+                    <input class="form-control" id="equipment-quantity" name="quantity" type="number" min="0" value="1" required>
+                  </div>
+                  <div class="col-sm-3"><button class="btn btn-primary w-100" type="submit">Add</button></div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <h2 class="h5 mb-3">Add stock item</h2>
-            <form id="stock-form" class="row g-3 align-items-end">
-              <div class="col-md-3">
-                <label class="form-label" for="stock-kind">Type</label>
-                <select class="form-select" id="stock-kind" name="kind"><option value="equipment">Equipment</option><option value="pharmacy">Medicine</option></select>
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h5 mb-3">Medicine</h2>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle">
+                    <thead><tr><th>Name</th><th>Quantity</th><th></th></tr></thead>
+                    <tbody id="medicine-rows"><tr><td colspan="3" class="text-secondary">Loading</td></tr></tbody>
+                  </table>
+                </div>
+                <form id="medicine-form" class="row g-2 align-items-end mt-2">
+                  <div class="col-sm-6">
+                    <label class="form-label" for="medicine-name">New medicine</label>
+                    <input class="form-control" id="medicine-name" name="name" required>
+                  </div>
+                  <div class="col-sm-3">
+                    <label class="form-label" for="medicine-quantity">Quantity</label>
+                    <input class="form-control" id="medicine-quantity" name="quantity" type="number" min="0" value="1" required>
+                  </div>
+                  <div class="col-sm-3"><button class="btn btn-primary w-100" type="submit">Add</button></div>
+                </form>
               </div>
-              <div class="col-md-5">
-                <label class="form-label" for="stock-name">Name</label>
-                <input class="form-control" id="stock-name" name="name" required>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label" for="stock-quantity">Quantity</label>
-                <input class="form-control" id="stock-quantity" name="quantity" type="number" min="0" value="1" required>
-              </div>
-              <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Save</button></div>
-            </form>
+            </div>
           </div>
         </div>
       </section>

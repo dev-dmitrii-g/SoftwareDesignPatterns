@@ -81,18 +81,17 @@ function renderAdmissions(items) {
   }
 }
 
-function renderStock(items) {
-  const body = $("stock-rows");
+function renderStockRows(bodyId, items) {
+  const body = $(bodyId);
   body.replaceChildren();
   if (!items.length) {
     const row = document.createElement("tr");
-    cell(row, "No stock").colSpan = 4;
+    cell(row, "No items").colSpan = 3;
     body.append(row);
     return;
   }
   for (const item of items) {
     const row = document.createElement("tr");
-    cell(row, item.kind === "pharmacy" ? "Medicine" : "Equipment");
     cell(row, item.name);
     const quantity = document.createElement("td");
     const input = document.createElement("input");
@@ -116,6 +115,33 @@ function renderStock(items) {
     row.append(action);
     body.append(row);
   }
+}
+
+function updateChoices(selectId, items, placeholder) {
+  const select = $(selectId);
+  const previous = select.value;
+  const options = [];
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = placeholder;
+  options.push(empty);
+  for (const item of items) {
+    const option = document.createElement("option");
+    option.value = item.name;
+    option.textContent = `${item.name} (${item.quantity} available)`;
+    options.push(option);
+  }
+  select.replaceChildren(...options);
+  select.value = items.some((item) => item.name === previous) ? previous : (items[0]?.name || "");
+}
+
+function renderStock(items) {
+  const equipment = items.filter((item) => item.kind === "equipment");
+  const medicine = items.filter((item) => item.kind === "pharmacy");
+  renderStockRows("equipment-rows", equipment);
+  renderStockRows("medicine-rows", medicine);
+  updateChoices("equipment", equipment, "Choose equipment");
+  updateChoices("medicine", medicine, "Choose medicine");
 }
 
 function showView(view) {
@@ -179,11 +205,13 @@ for (const button of document.querySelectorAll("[data-admission-action]")) {
   });
 }
 
-$("stock-form").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const values = Object.fromEntries(new FormData(event.target));
-  await act("/api/stock", { ...values, quantity: Number(values.quantity) }, "Stock saved");
-});
+for (const [formId, kind] of [["equipment-form", "equipment"], ["medicine-form", "pharmacy"]]) {
+  $(formId).addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.target));
+    await act("/api/stock", { ...values, kind, quantity: Number(values.quantity) }, "Stock saved");
+  });
+}
 $("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, "Admission completed"));
 $("compensate").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/compensate`, {}, "Admission compensated"));
 $("refresh").addEventListener("click", () => refresh().catch((failure) => notice(failure.message, true)));
