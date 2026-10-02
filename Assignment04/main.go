@@ -18,14 +18,14 @@ func usage() {
 	fmt.Fprintln(os.Stderr, `Usage: go run . -db hospital.db COMMAND [arguments]
 Commands:
   stock equipment|pharmacy NAME QUANTITY
-  start ID IIN POLICY EQUIPMENT MEDICINE   # stop after insurance
+  start ID IIN COVERAGE EQUIPMENT MEDICINE   # stop after insurance
   resume ID                              # continue after restart
-  admit ID IIN POLICY EQUIPMENT MEDICINE  # full chain
+  admit ID IIN COVERAGE EQUIPMENT MEDICINE  # full chain
   inspect ID
   compensate ID
   serve                                  # browser UI on 127.0.0.1:8080
 
-IIN is a 12-digit identifier. New databases include wheelchair and paracetamol stock.
+Coverage: GOBMP, OSMS, DMS, or NONE. New databases include wheelchair and paracetamol stock.
 Example: go run . serve (use -addr before serve for a different port)`)
 }
 func run(args []string) error {
@@ -81,9 +81,9 @@ func run(args []string) error {
 	case "start", "admit":
 		if len(a) != 6 {
 			usage()
-			return fmt.Errorf("%s needs ID, IIN, policy, equipment, medicine", a[0])
+			return fmt.Errorf("%s needs ID, IIN, coverage, equipment, medicine", a[0])
 		}
-		request := admission.Admission{ID: a[1], IIN: a[2], Policy: a[3], Equipment: a[4], Medicine: a[5]}
+		request := admission.Admission{ID: a[1], IIN: a[2], Coverage: a[3], Equipment: a[4], Medicine: a[5]}
 		if a[0] == "start" {
 			err = f.Start(request)
 		} else {

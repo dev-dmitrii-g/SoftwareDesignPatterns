@@ -7,12 +7,16 @@ import (
 )
 
 const (
-	New      = "NEW"
-	Verified = "VERIFIED"
-	Reversed = "REVERSED"
+	New        = "NEW"
+	Verified   = "VERIFIED"
+	Reversed   = "REVERSED"
+	NoCoverage = "NONE"
+	GOBMP      = "GOBMP"
+	OSMS       = "OSMS"
+	DMS        = "DMS"
 )
 
-type Verification struct{ AdmissionID, IIN, Policy, Status string }
+type Verification struct{ AdmissionID, IIN, Coverage, Status string }
 
 func (v *Verification) Transition(to string) error {
 	if (v.Status == New && to == Verified) || (v.Status == Verified && to == Reversed) {
@@ -24,7 +28,7 @@ func (v *Verification) Transition(to string) error {
 
 type Rule struct{}
 
-func (Rule) Check(iin, policy string) error {
+func (Rule) Check(iin, coverage string) error {
 	if len(iin) != 12 {
 		return errors.New("IIN must contain 12 digits")
 	}
@@ -33,22 +37,26 @@ func (Rule) Check(iin, policy string) error {
 			return errors.New("IIN must contain 12 digits")
 		}
 	}
-	if policy == "" {
-		return errors.New("policy number is required")
+	switch coverage {
+	case GOBMP, OSMS, DMS:
+		return nil
+	case NoCoverage:
+		return errors.New("no coverage selected")
+	default:
+		return errors.New("choose GOBMP, OSMS, or DMS coverage")
 	}
-	return nil
 }
 
 type Repository struct{ DB *sql.DB }
 
 func (r Repository) Save(v Verification) error {
-	_, err := r.DB.Exec(`INSERT INTO insurance(admission_id,iin,policy,status) VALUES(?,?,?,?)
-	ON CONFLICT(admission_id) DO UPDATE SET status=excluded.status`, v.AdmissionID, v.IIN, v.Policy, v.Status)
+	_, err := r.DB.Exec(`INSERT INTO insurance(admission_id,iin,coverage,status) VALUES(?,?,?,?)
+	ON CONFLICT(admission_id) DO UPDATE SET status=excluded.status`, v.AdmissionID, v.IIN, v.Coverage, v.Status)
 	return err
 }
 func (r Repository) Get(id string) (Verification, error) {
 	var v Verification
-	err := r.DB.QueryRow(`SELECT admission_id,iin,policy,status FROM insurance WHERE admission_id=?`, id).Scan(&v.AdmissionID, &v.IIN, &v.Policy, &v.Status)
+	err := r.DB.QueryRow(`SELECT admission_id,iin,coverage,status FROM insurance WHERE admission_id=?`, id).Scan(&v.AdmissionID, &v.IIN, &v.Coverage, &v.Status)
 	return v, err
 }
 
@@ -57,11 +65,11 @@ type Verifier struct {
 	Repository Repository
 }
 
-func (s Verifier) Verify(id, iin, policy string) error {
-	if err := s.Rule.Check(iin, policy); err != nil {
+func (s Verifier) Verify(id, iin, coverage string) error {
+	if err := s.Rule.Check(iin, coverage); err != nil {
 		return err
 	}
-	v := Verification{id, iin, policy, New}
+	v := Verification{id, iin, coverage, New}
 	if err := v.Transition(Verified); err != nil {
 		return err
 	}

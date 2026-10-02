@@ -49,6 +49,12 @@ function cell(row, value) {
   return td;
 }
 
+function coverageLabel(value) {
+  if (value === "NONE") return "No coverage";
+  if (["GOBMP", "OSMS", "DMS"].includes(value)) return value;
+  return `Legacy: ${value}`;
+}
+
 function renderAdmissions(items) {
   const body = $("admission-rows");
   body.replaceChildren();
@@ -63,7 +69,7 @@ function renderAdmissions(items) {
     const row = document.createElement("tr");
     cell(row, admission.ID);
     cell(row, admission.IIN);
-    cell(row, admission.Policy);
+    cell(row, coverageLabel(admission.Coverage));
     cell(row, admission.Equipment);
     cell(row, admission.Medicine);
     const status = document.createElement("td");

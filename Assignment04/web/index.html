@@ -36,8 +36,13 @@
                   <input class="form-control" id="iin" name="iin" inputmode="numeric" pattern="[0-9]{12}" maxlength="12" placeholder="12 digits" required>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label" for="policy">Policy</label>
-                  <input class="form-control" id="policy" name="policy" required>
+                  <label class="form-label" for="coverage">Coverage</label>
+                  <select class="form-select" id="coverage" name="coverage" required>
+                    <option value="OSMS">OSMS</option>
+                    <option value="GOBMP">GOBMP</option>
+                    <option value="DMS">DMS</option>
+                    <option value="NONE">No coverage</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="equipment">Equipment</label>
@@ -64,7 +69,7 @@
             </div>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>ID</th><th>IIN</th><th>Policy</th><th>Equipment</th><th>Medicine</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>ID</th><th>IIN</th><th>Coverage</th><th>Equipment</th><th>Medicine</th><th>Status</th><th></th></tr></thead>
                 <tbody id="admission-rows"><tr><td colspan="7" class="text-secondary">Loading</td></tr></tbody>
               </table>
             </div>

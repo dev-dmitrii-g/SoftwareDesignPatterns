@@ -12,7 +12,7 @@ text{font-family:Arial,Helvetica,sans-serif;fill:#17212b} .title{font-size:25px;
 <rect x="35" y="225" width="345" height="405" rx="9" class="sub"/>
 <text x="55" y="258" class="head">A  Insurance Verifier</text>
 <rect x="58" y="285" width="298" height="65" rx="6" class="box"/><text x="74" y="311" class="head">Verifier</text><text x="74" y="334" class="small">Verify · Reverse</text>
-<rect x="58" y="370" width="298" height="65" rx="6" class="box"/><text x="74" y="397" class="head">Rule</text><text x="74" y="420" class="small">Check IIN and policy</text>
+<rect x="58" y="370" width="298" height="65" rx="6" class="box"/><text x="74" y="397" class="head">Rule</text><text x="74" y="420" class="small">Check IIN and coverage</text>
 <rect x="58" y="455" width="298" height="65" rx="6" class="box"/><text x="74" y="481" class="head">Repository</text><text x="74" y="504" class="small">Save · Get</text>
 <rect x="58" y="540" width="298" height="65" rx="6" class="box"/><text x="74" y="567" class="head">Verification</text><text x="74" y="590" class="small">NEW → VERIFIED → REVERSED</text>
 <rect x="427" y="225" width="345" height="405" rx="9" class="sub"/>

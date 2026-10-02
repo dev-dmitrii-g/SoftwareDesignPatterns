@@ -56,7 +56,7 @@ func (h *hospital) stock(equipmentQty, medicineQty int) *hospital {
 	return h
 }
 func request(id string) admission.Admission {
-	return admission.Admission{ID: id, IIN: "990101123456", Policy: "POL-1", Equipment: "wheelchair", Medicine: "paracetamol"}
+	return admission.Admission{ID: id, IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"}
 }
 
 func (h *hospital) admits(id string) error { h.t.Helper(); return h.intake.Admit(request(id)) }
@@ -178,7 +178,7 @@ func TestSubsystemsWorkAloneAndRejectIllegalTransitions(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
 	defer h.db.Close()
 	i, e, p := h.intake.Insurance, h.intake.Equipment, h.intake.Pharmacy
-	if err := i.Verify("i", "990101123456", "POL"); err != nil {
+	if err := i.Verify("i", "990101123456", "OSMS"); err != nil {
 		t.Fatal(err)
 	}
 	if err := i.Reverse("i"); err != nil {
@@ -202,7 +202,7 @@ func TestSubsystemsWorkAloneAndRejectIllegalTransitions(t *testing.T) {
 	if _, err := p.Repository.Get("p"); err != nil {
 		t.Fatal(err)
 	}
-	if err := i.Verify("invalid", "123", "POL"); err == nil {
+	if err := i.Verify("invalid", "123", "OSMS"); err == nil {
 		t.Fatal("invalid IIN accepted")
 	}
 	if err := e.Reserve("blank", ""); err == nil {
@@ -217,11 +217,13 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
 	defer h.db.Close()
 	for _, bad := range []admission.Admission{
-		{IIN: "990101123456", Policy: "P", Equipment: "wheelchair", Medicine: "paracetamol"},
-		{ID: "bad-policy", IIN: "990101123456", Equipment: "wheelchair", Medicine: "paracetamol"},
-		{ID: "bad-equipment", IIN: "990101123456", Policy: "P", Medicine: "paracetamol"},
-		{ID: "bad-medicine", IIN: "990101123456", Policy: "P", Equipment: "wheelchair"},
-		{ID: "bad-digit", IIN: "99010112345x", Policy: "P", Equipment: "wheelchair", Medicine: "paracetamol"},
+		{IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "bad-coverage", IIN: "990101123456", Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "no-coverage", IIN: "990101123456", Coverage: insurance.NoCoverage, Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "unknown-coverage", IIN: "990101123456", Coverage: "OTHER", Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "bad-equipment", IIN: "990101123456", Coverage: "OSMS", Medicine: "paracetamol"},
+		{ID: "bad-medicine", IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair"},
+		{ID: "bad-digit", IIN: "99010112345x", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"},
 	} {
 		if err := h.intake.Start(bad); err == nil {
 			t.Fatalf("accepted %+v", bad)
@@ -260,6 +262,19 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 	}
 }
 
+func TestAcceptedCoverageChoices(t *testing.T) {
+	h := aHospital(t).stock(3, 3)
+	defer h.db.Close()
+	for _, coverage := range []string{insurance.GOBMP, insurance.OSMS, insurance.DMS} {
+		request := request(coverage)
+		request.Coverage = coverage
+		if err := h.intake.Admit(request); err != nil {
+			t.Fatalf("%s: %v", coverage, err)
+		}
+		h.records(coverage, admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	}
+}
+
 func TestResumeFromPersistedPendingAndCompensating(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
 	defer h.db.Close()
@@ -290,7 +305,7 @@ func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
 	if err := h.intake.Gateway.Create(request("after-a")); err != nil {
 		t.Fatal(err)
 	}
-	if err := h.intake.Insurance.Verify("after-a", "990101123456", "POL-1"); err != nil {
+	if err := h.intake.Insurance.Verify("after-a", "990101123456", "OSMS"); err != nil {
 		t.Fatal(err)
 	}
 	h.reopen()

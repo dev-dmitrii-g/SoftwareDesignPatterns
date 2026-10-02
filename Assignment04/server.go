@@ -165,7 +165,7 @@ func (s webServer) admit(w http.ResponseWriter, r *http.Request) {
 		Action    string `json:"action"`
 		ID        string `json:"id"`
 		IIN       string `json:"iin"`
-		Policy    string `json:"policy"`
+		Coverage  string `json:"coverage"`
 		Equipment string `json:"equipment"`
 		Medicine  string `json:"medicine"`
 	}
@@ -173,7 +173,7 @@ func (s webServer) admit(w http.ResponseWriter, r *http.Request) {
 		bad(w, 400, err)
 		return
 	}
-	a := admission.Admission{ID: strings.TrimSpace(req.ID), IIN: strings.TrimSpace(req.IIN), Policy: strings.TrimSpace(req.Policy), Equipment: strings.TrimSpace(req.Equipment), Medicine: strings.TrimSpace(req.Medicine)}
+	a := admission.Admission{ID: strings.TrimSpace(req.ID), IIN: strings.TrimSpace(req.IIN), Coverage: strings.TrimSpace(req.Coverage), Equipment: strings.TrimSpace(req.Equipment), Medicine: strings.TrimSpace(req.Medicine)}
 	var err error
 	switch req.Action {
 	case "start":

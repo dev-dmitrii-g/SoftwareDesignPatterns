@@ -67,7 +67,7 @@ func TestWebDemo(t *testing.T) {
 			t.Fatalf("set stock: %d", status)
 		}
 	}
-	request := map[string]any{"action": "admit", "id": "C1", "iin": "990101123456", "policy": "P", "equipment": "wheelchair", "medicine": "paracetamol"}
+	request := map[string]any{"action": "admit", "id": "C1", "iin": "990101123456", "coverage": "OSMS", "equipment": "wheelchair", "medicine": "paracetamol"}
 	status, body := post("/api/admissions", request)
 	if status != 422 || body["view"].(map[string]any)["Admission"].(map[string]any)["Status"] != admission.Compensated {
 		t.Fatalf("C failure: %d %+v", status, body)
@@ -110,7 +110,7 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 		Pharmacy:  pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}},
 	}
 	handler := newServer(db, f, admission.AdminFacade{Intake: f})
-	body := []byte(`{"action":"admit","id":"A1","iin":"990101123456","policy":"P","equipment":"wheelchair","medicine":"paracetamol"}`)
+	body := []byte(`{"action":"admit","id":"A1","iin":"990101123456","coverage":"OSMS","equipment":"wheelchair","medicine":"paracetamol"}`)
 	req := httptest.NewRequest("POST", "/api/admissions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
@@ -147,7 +147,7 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 			t.Fatalf("add stock: %d %s", response.Code, response.Body.String())
 		}
 	}
-	response = post("/api/admissions", map[string]any{"action": "admit", "id": "A2", "iin": "990101123456", "policy": "P", "equipment": "oxygen monitor", "medicine": "ibuprofen"})
+	response = post("/api/admissions", map[string]any{"action": "admit", "id": "A2", "iin": "990101123456", "coverage": "OSMS", "equipment": "oxygen monitor", "medicine": "ibuprofen"})
 	if response.Code != 200 {
 		t.Fatalf("custom stock admission: %d %s", response.Code, response.Body.String())
 	}

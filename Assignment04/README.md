@@ -2,11 +2,13 @@
 
 A small Go application coordinates three independent services with durable SQLite state:
 
-1. **Insurance Verifier** checks a 12-digit IIN and policy number, then persists `VERIFIED`.
+1. **Insurance Verifier** checks a 12-digit IIN and selected coverage, then persists `VERIFIED`.
 2. **Equipment Reserver** reserves one named item from SQLite stock.
 3. **Pharmacy Dispatcher** dispatches one named medicine from SQLite stock.
 
-This is a teaching model. The IIN check only verifies 12 digits; no live Kazakhstan insurance, prescription, or hospital system is contacted.
+Coverage choices are `GOBMP` (guaranteed state package), `OSMS` (mandatory social health insurance), `DMS` (voluntary insurance), and `NONE` (no coverage). The IIN check only verifies 12 digits; no live Kazakhstan insurance, prescription, or hospital system is contacted. `NONE` stops this planned admission at the first step. This local rule does not assess a person's entitlement to state-funded care; GOBMP can apply regardless of OSMS status. Existing `policy` columns are renamed to `coverage` when an older database is opened, preserving old values.
+
+Coverage categories follow [Kazakhstan government information on GOBMP and OSMS](https://www.gov.kz/article/171880?lang=ru) and [government information on voluntary medical insurance](https://www.gov.kz/situations/722/intro?lang=ru).
 
 ## Browser frontend
 
@@ -16,14 +18,14 @@ Start the local web server and open **http://127.0.0.1:8080**:
 go run . -db hospital.db serve
 ```
 
-The site has **Admissions** and **Stock** tabs. Admissions contains the form, admission table, and status details. Equipment and medicine are selected from the items in Stock. Stock has separate equipment and medicine tables where quantities can be changed and new items added. A new database starts with five wheelchairs and five paracetamol units, so a normal admission can succeed immediately. To show an equipment failure, set wheelchair quantity to zero and create a new admission. To show a pharmacy failure, set wheelchair quantity above zero and paracetamol quantity to zero. Items with zero quantity remain selectable so these failures can be shown. The saved admission details show which steps were reversed. The page and CLI use the same `hospital.db` file. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN.
+The site has **Admissions** and **Stock** tabs. Admissions contains the form, admission table, and status details. Coverage is chosen from the four options above; equipment and medicine are selected from the items in Stock. Stock has separate equipment and medicine tables where quantities can be changed and new items added. A new database starts with five wheelchairs and five paracetamol units, so a normal admission can succeed immediately. To show an equipment failure, set wheelchair quantity to zero and create a new admission. To show a pharmacy failure, set wheelchair quantity above zero and paracetamol quantity to zero. Items with zero quantity remain selectable so these failures can be shown. The saved admission details show which steps were reversed. The page and CLI use the same `hospital.db` file. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN.
 
 ## CLI
 
 Requires Go 1.25+, a C compiler (for `go-sqlite3`), and internet access for the first dependency download. From this directory:
 
 ```sh
-go run . -db hospital.db admit A001 990101123456 POL-1 wheelchair paracetamol
+go run . -db hospital.db admit A001 990101123456 OSMS wheelchair paracetamol
 go run . -db hospital.db inspect A001
 ```
 
@@ -35,12 +37,12 @@ Use separate IDs. These commands work on the same database used above:
 
 ```sh
 go run . -db hospital.db stock equipment wheelchair 0
-go run . -db hospital.db admit B001 990101123456 POL-2 wheelchair paracetamol
+go run . -db hospital.db admit B001 990101123456 GOBMP wheelchair paracetamol
 go run . -db hospital.db inspect B001
 
 go run . -db hospital.db stock equipment wheelchair 1
 go run . -db hospital.db stock pharmacy paracetamol 0
-go run . -db hospital.db admit C001 990101123456 POL-3 wheelchair paracetamol
+go run . -db hospital.db admit C001 990101123456 DMS wheelchair paracetamol
 go run . -db hospital.db inspect C001
 ```
 
@@ -51,7 +53,7 @@ go run . -db hospital.db inspect C001
 ```sh
 go run . -db hospital.db stock equipment wheelchair 1
 go run . -db hospital.db stock pharmacy paracetamol 1
-go run . -db hospital.db start R001 990101123456 POL-4 wheelchair paracetamol
+go run . -db hospital.db start R001 990101123456 OSMS wheelchair paracetamol
 go run . -db hospital.db resume R001
 go run . -db hospital.db inspect R001
 ```
@@ -73,7 +75,7 @@ SQLite transactions keep each stock change together with its reservation or disp
 Without the facade, a client would need several immediate collaborators and would have to know their order and compensation rules:
 
 ```go
-insuranceVerifier.Verify(id, iin, policy)
+insuranceVerifier.Verify(id, iin, coverage)
 if err := equipmentReserver.Reserve(id, item); err != nil {
     insuranceVerifier.Reverse(id)
 }
