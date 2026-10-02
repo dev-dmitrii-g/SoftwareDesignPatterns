@@ -53,7 +53,6 @@ func (g Gateway) Update(id, status, reason string) error {
 	return err
 }
 
-// IntakeFacade is the only object a normal client needs for the chain.
 type IntakeFacade struct {
 	Gateway   Gateway
 	Insurance insurance.Verifier
@@ -154,8 +153,6 @@ func (f IntakeFacade) compensate(id, reason string) error {
 	if err := f.Gateway.Update(id, Compensating, reason); err != nil {
 		return err
 	}
-	// Read the committed rows. A restart or a status update failure may leave the
-	// progress marker behind the actual subsystem state.
 	b, err := f.Equipment.Repository.Get(id)
 	if err != nil && err != sql.ErrNoRows {
 		return err
@@ -182,7 +179,6 @@ type View struct {
 	Insurance, Equipment, Pharmacy string
 }
 
-// AdminFacade gives operators inspection and manual compensation only.
 type AdminFacade struct{ Intake IntakeFacade }
 
 func (f AdminFacade) Inspect(id string) (View, error) {

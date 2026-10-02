@@ -25,7 +25,7 @@ Commands:
   compensate ID
   serve                                  # browser UI on 127.0.0.1:8080
 
-IIN is a 12-digit demo identifier. Set stock before admission.
+IIN is a 12-digit identifier. New databases include wheelchair and paracetamol stock.
 Example: go run . serve (use -addr before serve for a different port)`)
 }
 func run(args []string) error {

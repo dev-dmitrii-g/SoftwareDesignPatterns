@@ -7,7 +7,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Open creates the small, durable database used by the three independent gateways.
 func Open(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
@@ -19,7 +18,9 @@ func Open(path string) (*sql.DB, error) {
 	CREATE TABLE IF NOT EXISTS equipment (admission_id TEXT PRIMARY KEY, item TEXT NOT NULL, status TEXT NOT NULL);
 	CREATE TABLE IF NOT EXISTS pharmacy (admission_id TEXT PRIMARY KEY, medicine TEXT NOT NULL, status TEXT NOT NULL);
 	CREATE TABLE IF NOT EXISTS stock (kind TEXT NOT NULL, name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity >= 0), PRIMARY KEY(kind, name));
-	CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, policy TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');`); err != nil {
+	CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, policy TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');
+	INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('equipment','wheelchair',5);
+	INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('pharmacy','paracetamol',5);`); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("initialize database: %w", err)
 	}

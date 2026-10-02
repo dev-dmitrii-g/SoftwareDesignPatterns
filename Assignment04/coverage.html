@@ -132,7 +132,6 @@ func (g Gateway) Update(id, status, reason string) error <span class="cov8" titl
         return err
 }</span>
 
-// IntakeFacade is the only object a normal client needs for the chain.
 type IntakeFacade struct {
         Gateway   Gateway
         Insurance insurance.Verifier
@@ -233,8 +232,6 @@ func (f IntakeFacade) compensate(id, reason string) error <span class="cov8" tit
         if err := f.Gateway.Update(id, Compensating, reason); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
-        // Read the committed rows. A restart or a status update failure may leave the
-        // progress marker behind the actual subsystem state.
         <span class="cov8" title="1">b, err := f.Equipment.Repository.Get(id)
         if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
                 return err
@@ -261,7 +258,6 @@ type View struct {
         Insurance, Equipment, Pharmacy string
 }
 
-// AdminFacade gives operators inspection and manual compensation only.
 type AdminFacade struct{ Intake IntakeFacade }
 
 func (f AdminFacade) Inspect(id string) (View, error) <span class="cov8" title="1">{
@@ -607,7 +603,6 @@ import (
         _ "github.com/mattn/go-sqlite3"
 )
 
-// Open creates the small, durable database used by the three independent gateways.
 func Open(path string) (*sql.DB, error) <span class="cov8" title="1">{
         db, err := sql.Open("sqlite3", path)
         if err != nil </span><span class="cov0" title="0">{
@@ -619,7 +614,9 @@ func Open(path string) (*sql.DB, error) <span class="cov8" title="1">{
         CREATE TABLE IF NOT EXISTS equipment (admission_id TEXT PRIMARY KEY, item TEXT NOT NULL, status TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS pharmacy (admission_id TEXT PRIMARY KEY, medicine TEXT NOT NULL, status TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS stock (kind TEXT NOT NULL, name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity &gt;= 0), PRIMARY KEY(kind, name));
-        CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, policy TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');`); err != nil </span><span class="cov0" title="0">{
+        CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, policy TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');
+        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('equipment','wheelchair',5);
+        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('pharmacy','paracetamol',5);`); err != nil </span><span class="cov0" title="0">{
                 db.Close()
                 return nil, fmt.Errorf("initialize database: %w", err)
         }</span>

@@ -3,140 +3,129 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hospital Admission Demo</title>
+  <title>Hospital Admission</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="/app.css" rel="stylesheet">
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <header class="topbar py-4 py-md-5">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
-        <div>
-          <div class="eyebrow mb-2">FACADE PATTERN · LIVE DEMO</div>
-          <h1 class="h2 mb-2">Hospital Admission</h1>
-          <p class="mb-0 text-white-50">One request. Three independent steps. Visible compensation when a later step fails.</p>
-        </div>
-        <span class="storage-pill">SQLite state persists between restarts</span>
-      </div>
-    </div>
-  </header>
+  <div class="container py-4">
+    <header class="mb-4">
+      <h1 class="h3 mb-4">Hospital Admission</h1>
+      <nav class="nav nav-tabs" aria-label="Sections">
+        <button id="tab-admissions" class="nav-link active" type="button" aria-selected="true" aria-controls="panel-admissions">Admissions</button>
+        <button id="tab-stock" class="nav-link" type="button" aria-selected="false" aria-controls="panel-stock">Stock</button>
+      </nav>
+    </header>
 
-  <main class="container py-4 py-md-5">
     <div id="notice" class="alert d-none" role="status" aria-live="polite"></div>
 
-    <div class="row g-4">
-      <div class="col-lg-7">
-        <section class="card panel h-100">
-          <div class="card-body p-4">
-            <div class="section-kicker">01 · REQUEST</div>
-            <h2 class="h4 mb-2">New admission</h2>
-            <p class="text-secondary mb-4">Enter a demo patient and the resources to reserve and dispatch.</p>
+    <main>
+      <section id="panel-admissions">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h2 class="h5 mb-3">New admission</h2>
             <form id="admission-form">
               <div class="row g-3">
-                <div class="col-sm-5">
+                <div class="col-md-4">
                   <label class="form-label" for="admission-id">Admission ID</label>
-                  <input class="form-control" id="admission-id" name="id" value="A001" required autocomplete="off">
+                  <input class="form-control" id="admission-id" name="id" required autocomplete="off">
                 </div>
-                <div class="col-sm-7">
-                  <label class="form-label" for="iin">IIN <span class="text-secondary fw-normal">(12 demo digits)</span></label>
-                  <input class="form-control" id="iin" name="iin" value="990101123456" inputmode="numeric" pattern="[0-9]{12}" maxlength="12" required>
+                <div class="col-md-4">
+                  <label class="form-label" for="iin">IIN</label>
+                  <input class="form-control" id="iin" name="iin" inputmode="numeric" pattern="[0-9]{12}" maxlength="12" placeholder="12 digits" required>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-md-4">
                   <label class="form-label" for="policy">Policy</label>
-                  <input class="form-control" id="policy" name="policy" value="POL-1" required>
+                  <input class="form-control" id="policy" name="policy" required>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-md-6">
                   <label class="form-label" for="equipment">Equipment</label>
                   <input class="form-control" id="equipment" name="equipment" value="wheelchair" required>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-md-6">
                   <label class="form-label" for="medicine">Medicine</label>
                   <input class="form-control" id="medicine" name="medicine" value="paracetamol" required>
                 </div>
               </div>
-              <div class="d-flex gap-2 flex-wrap mt-4">
-                <button class="btn btn-primary px-4" type="button" data-admission-action="admit">Run full admission</button>
-                <button class="btn btn-outline-primary" type="button" data-admission-action="start">Stop after insurance</button>
+              <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary" type="button" data-admission-action="admit">Admit</button>
+                <button class="btn btn-outline-primary" type="button" data-admission-action="start">Verify only</button>
               </div>
             </form>
-            <div class="flow mt-4 pt-4 border-top d-flex align-items-center flex-wrap gap-2" aria-label="Admission steps">
-              <span>A · Verify insurance</span><b>→</b><span>B · Reserve equipment</span><b>→</b><span>C · Dispatch medicine</span>
-            </div>
           </div>
-        </section>
-      </div>
+        </div>
 
-      <div class="col-lg-5">
-        <section class="card panel h-100">
-          <div class="card-body p-4">
-            <div class="section-kicker">02 · RESOURCES</div>
-            <h2 class="h4 mb-2">Stock controls</h2>
-            <p class="text-secondary mb-4">Set available quantities before running the chain.</p>
-            <form id="stock-form" class="row g-3 align-items-end">
-              <div class="col-sm-4">
-                <label class="form-label" for="stock-kind">Type</label>
-                <select class="form-select" id="stock-kind" name="kind"><option value="equipment">Equipment</option><option value="pharmacy">Medicine</option></select>
-              </div>
-              <div class="col-sm-5">
-                <label class="form-label" for="stock-name">Name</label>
-                <input class="form-control" id="stock-name" name="name" value="wheelchair" required>
-              </div>
-              <div class="col-sm-3">
-                <label class="form-label" for="stock-quantity">Quantity</label>
-                <input class="form-control" id="stock-quantity" name="quantity" type="number" min="0" value="1" required>
-              </div>
-              <div class="col-12"><button class="btn btn-outline-primary w-100" type="submit">Save stock</button></div>
-            </form>
-            <div class="small text-secondary mt-4 mb-2">Quick failure setup for the names in the admission form</div>
-            <div class="d-flex gap-2 flex-wrap">
-              <button id="prepare-b" class="btn btn-light border btn-sm" type="button">B fails · equipment 0</button>
-              <button id="prepare-c" class="btn btn-light border btn-sm" type="button">C fails · medicine 0</button>
-            </div>
-            <div class="table-responsive mt-4">
-              <table class="table table-sm align-middle mb-0"><thead><tr><th>Type</th><th>Name</th><th class="text-end">Available</th></tr></thead><tbody id="stock-rows"><tr><td colspan="3" class="text-secondary">Loading…</td></tr></tbody></table>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <div class="row g-4 mt-0">
-      <div class="col-lg-7">
-        <section class="card panel h-100">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-              <div><div class="section-kicker">03 · HISTORY</div><h2 class="h4 mb-0">Admissions</h2></div>
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 mb-0">Admissions</h2>
               <button id="refresh" class="btn btn-outline-secondary btn-sm" type="button">Refresh</button>
             </div>
             <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0"><thead><tr><th>ID</th><th>Status</th><th>Equipment</th><th>Medicine</th><th class="text-end">Action</th></tr></thead><tbody id="admission-rows"><tr><td colspan="5" class="text-secondary">Loading…</td></tr></tbody></table>
+              <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>ID</th><th>IIN</th><th>Policy</th><th>Equipment</th><th>Medicine</th><th>Status</th><th></th></tr></thead>
+                <tbody id="admission-rows"><tr><td colspan="7" class="text-secondary">Loading</td></tr></tbody>
+              </table>
             </div>
           </div>
-        </section>
-      </div>
-      <div class="col-lg-5">
-        <section class="card panel h-100">
-          <div class="card-body p-4">
-            <div class="section-kicker">04 · INSPECTION</div>
-            <h2 class="h4 mb-3">Persisted state</h2>
-            <div id="detail-empty" class="empty-state">Select an admission to inspect each committed step.</div>
-            <div id="detail" class="d-none">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-3"><strong id="detail-id" class="fs-5"></strong><span id="detail-status"></span></div>
-              <div class="step"><span>Insurance verifier</span><strong id="detail-insurance"></strong></div>
-              <div class="step"><span>Equipment reserver</span><strong id="detail-equipment"></strong></div>
-              <div class="step"><span>Pharmacy dispatcher</span><strong id="detail-pharmacy"></strong></div>
-              <div id="detail-reason" class="small text-danger-emphasis mt-3 d-none"></div>
-              <div class="d-flex gap-2 flex-wrap mt-4">
-                <button id="resume" class="btn btn-primary btn-sm" type="button">Resume chain</button>
-                <button id="compensate" class="btn btn-outline-danger btn-sm" type="button">Compensate manually</button>
+        </div>
+
+        <div id="detail" class="card d-none">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 id="detail-id" class="h5 mb-0"></h2>
+              <span id="detail-status"></span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered mb-3">
+                <thead><tr><th>Insurance</th><th>Equipment</th><th>Pharmacy</th></tr></thead>
+                <tbody><tr><td id="detail-insurance"></td><td id="detail-equipment"></td><td id="detail-pharmacy"></td></tr></tbody>
+              </table>
+            </div>
+            <p id="detail-reason" class="text-danger d-none"></p>
+            <div class="d-flex gap-2">
+              <button id="resume" class="btn btn-primary btn-sm" type="button">Resume</button>
+              <button id="compensate" class="btn btn-outline-danger btn-sm" type="button">Compensate</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-stock" class="d-none">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h2 class="h5 mb-3">Stock</h2>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Type</th><th>Name</th><th>Quantity</th><th></th></tr></thead>
+                <tbody id="stock-rows"><tr><td colspan="4" class="text-secondary">Loading</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 mb-3">Add stock item</h2>
+            <form id="stock-form" class="row g-3 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label" for="stock-kind">Type</label>
+                <select class="form-select" id="stock-kind" name="kind"><option value="equipment">Equipment</option><option value="pharmacy">Medicine</option></select>
               </div>
-            </div>
+              <div class="col-md-5">
+                <label class="form-label" for="stock-name">Name</label>
+                <input class="form-control" id="stock-name" name="name" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label" for="stock-quantity">Quantity</label>
+                <input class="form-control" id="stock-quantity" name="quantity" type="number" min="0" value="1" required>
+              </div>
+              <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Save</button></div>
+            </form>
           </div>
-        </section>
-      </div>
-    </div>
-    <p class="small text-secondary mt-4 mb-0">Teaching demo only: IIN validation checks format, and stock represents example resources.</p>
-  </main>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>

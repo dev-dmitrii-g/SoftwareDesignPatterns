@@ -96,3 +96,35 @@ func TestWebDemo(t *testing.T) {
 		t.Fatalf("missing admission: %d", status)
 	}
 }
+
+func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "normal.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	f := admission.IntakeFacade{
+		Gateway:   admission.Gateway{DB: db},
+		Insurance: insurance.Verifier{Rule: insurance.Rule{}, Repository: insurance.Repository{DB: db}},
+		Equipment: equipment.Reserver{Rule: equipment.Rule{}, Repository: equipment.Repository{DB: db}},
+		Pharmacy:  pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}},
+	}
+	handler := newServer(db, f, admission.AdminFacade{Intake: f})
+	body := []byte(`{"action":"admit","id":"A1","iin":"990101123456","policy":"P","equipment":"wheelchair","medicine":"paracetamol"}`)
+	req := httptest.NewRequest("POST", "/api/admissions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Code != 200 {
+		t.Fatalf("normal admission: %d %s", response.Code, response.Body.String())
+	}
+	var result struct {
+		View admission.View `json:"view"`
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result.View.Admission.Status != admission.Completed || result.View.Pharmacy != pharmacy.Dispatched {
+		t.Fatalf("normal admission state: %+v", result.View)
+	}
+}

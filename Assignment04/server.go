@@ -2,19 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"hospitaladmission/internal/admission"
 )
-
-//go:embed web/*
-var webFiles embed.FS
 
 type webServer struct {
 	db     *sql.DB
@@ -42,7 +39,7 @@ func (s webServer) index(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	data, err := webFiles.ReadFile("web/index.html")
+	data, err := os.ReadFile("web/index.html")
 	if err != nil {
 		http.Error(w, "page unavailable", http.StatusInternalServerError)
 		return
@@ -52,7 +49,7 @@ func (s webServer) index(w http.ResponseWriter, r *http.Request) {
 }
 func (s webServer) asset(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimPrefix(r.URL.Path, "/")
-	data, err := webFiles.ReadFile("web/" + name)
+	data, err := os.ReadFile("web/" + name)
 	if err != nil {
 		http.NotFound(w, r)
 		return

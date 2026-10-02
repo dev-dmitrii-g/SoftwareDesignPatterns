@@ -1,11 +1,24 @@
 const $ = (id) => document.getElementById(id);
 let selectedId = "";
 
+function newAdmissionID() {
+  return `ADM-${Date.now().toString(36).toUpperCase()}`;
+}
+
+function showTab(name) {
+  for (const tab of ["admissions", "stock"]) {
+    const active = tab === name;
+    $(`tab-${tab}`).classList.toggle("active", active);
+    $(`tab-${tab}`).setAttribute("aria-selected", String(active));
+    $(`panel-${tab}`).classList.toggle("d-none", !active);
+  }
+  $("notice").className = "alert d-none";
+}
+
 function notice(message, error = false) {
   const box = $("notice");
   box.className = `alert ${error ? "alert-danger" : "alert-success"}`;
   box.textContent = message;
-  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 async function api(path, options = {}) {
@@ -24,7 +37,7 @@ async function api(path, options = {}) {
 
 function stateBadge(status) {
   const badge = document.createElement("span");
-  badge.className = "badge-state " + (status === "COMPLETED" ? "completed" : status === "COMPENSATED" ? "compensated" : "pending");
+  badge.className = "status " + (status === "COMPLETED" ? "completed" : status === "COMPENSATED" ? "compensated" : "pending");
   badge.textContent = status.replaceAll("_", " ");
   return badge;
 }
@@ -36,12 +49,44 @@ function cell(row, value) {
   return td;
 }
 
+function renderAdmissions(items) {
+  const body = $("admission-rows");
+  body.replaceChildren();
+  if (!items.length) {
+    const row = document.createElement("tr");
+    cell(row, "No admissions").colSpan = 7;
+    body.append(row);
+    return;
+  }
+  for (const view of items) {
+    const admission = view.Admission;
+    const row = document.createElement("tr");
+    cell(row, admission.ID);
+    cell(row, admission.IIN);
+    cell(row, admission.Policy);
+    cell(row, admission.Equipment);
+    cell(row, admission.Medicine);
+    const status = document.createElement("td");
+    status.append(stateBadge(admission.Status));
+    row.append(status);
+    const action = document.createElement("td");
+    const button = document.createElement("button");
+    button.className = "btn btn-outline-secondary btn-sm";
+    button.type = "button";
+    button.textContent = "View";
+    button.addEventListener("click", () => showView(view));
+    action.append(button);
+    row.append(action);
+    body.append(row);
+  }
+}
+
 function renderStock(items) {
   const body = $("stock-rows");
   body.replaceChildren();
   if (!items.length) {
     const row = document.createElement("tr");
-    cell(row, "No stock set yet").colSpan = 3;
+    cell(row, "No stock").colSpan = 4;
     body.append(row);
     return;
   }
@@ -49,35 +94,24 @@ function renderStock(items) {
     const row = document.createElement("tr");
     cell(row, item.kind === "pharmacy" ? "Medicine" : "Equipment");
     cell(row, item.name);
-    cell(row, String(item.quantity)).classList.add("text-end", item.quantity === 0 ? "text-danger" : "text-success");
-    body.append(row);
-  }
-}
-
-function renderAdmissions(items) {
-  const body = $("admission-rows");
-  body.replaceChildren();
-  if (!items.length) {
-    const row = document.createElement("tr");
-    cell(row, "No admissions yet").colSpan = 5;
-    body.append(row);
-    return;
-  }
-  for (const view of items) {
-    const row = document.createElement("tr");
-    cell(row, view.Admission.ID).classList.add("fw-semibold");
-    const status = document.createElement("td");
-    status.append(stateBadge(view.Admission.Status));
-    row.append(status);
-    cell(row, view.Admission.Equipment);
-    cell(row, view.Admission.Medicine);
+    const quantity = document.createElement("td");
+    const input = document.createElement("input");
+    input.className = "form-control form-control-sm quantity-input";
+    input.type = "number";
+    input.min = "0";
+    input.value = String(item.quantity);
+    input.setAttribute("aria-label", `${item.name} quantity`);
+    quantity.append(input);
+    row.append(quantity);
     const action = document.createElement("td");
-    action.className = "text-end";
     const button = document.createElement("button");
+    button.className = "btn btn-outline-primary btn-sm";
     button.type = "button";
-    button.className = "btn btn-outline-secondary btn-sm";
-    button.textContent = "Inspect";
-    button.addEventListener("click", () => inspect(view.Admission.ID));
+    button.textContent = "Save";
+    button.addEventListener("click", async () => {
+      if (!input.reportValidity()) return;
+      await act("/api/stock", { kind: item.kind, name: item.name, quantity: Number(input.value) }, "Stock saved");
+    });
     action.append(button);
     row.append(action);
     body.append(row);
@@ -86,7 +120,6 @@ function renderAdmissions(items) {
 
 function showView(view) {
   selectedId = view.Admission.ID;
-  $("detail-empty").classList.add("d-none");
   $("detail").classList.remove("d-none");
   $("detail-id").textContent = selectedId;
   $("detail-status").replaceChildren(stateBadge(view.Admission.Status));
@@ -101,60 +134,58 @@ function showView(view) {
 
 async function refresh() {
   const data = await api("/api/state");
-  renderStock(data.stock);
   renderAdmissions(data.admissions);
+  renderStock(data.stock);
   if (selectedId) {
-    const current = data.admissions.find((v) => v.Admission.ID === selectedId);
+    const current = data.admissions.find((view) => view.Admission.ID === selectedId);
     if (current) showView(current);
   }
 }
 
-async function inspect(id) {
-  try { showView((await api(`/api/admissions/${encodeURIComponent(id)}`)).view); }
-  catch (error) { notice(error.message, true); }
-}
-
-async function act(path, payload, successText) {
+async function act(path, payload, successMessage) {
+  let view;
+  let message = successMessage;
+  let error = false;
   try {
     const data = await api(path, { method: "POST", body: JSON.stringify(payload) });
-    if (data.view) showView(data.view);
-    await refresh();
-    notice(successText);
-  } catch (error) {
-    if (error.view) showView(error.view);
-    await refresh();
-    notice(error.message, true);
+    view = data.view;
+  } catch (failure) {
+    view = failure.view;
+    message = failure.message;
+    error = true;
   }
+  if (view) showView(view);
+  try {
+    await refresh();
+  } catch (failure) {
+    message = failure.message;
+    error = true;
+  }
+  notice(message, error);
+  return Boolean(view);
 }
 
-document.querySelectorAll("[data-admission-action]").forEach((button) => {
+$("tab-admissions").addEventListener("click", () => showTab("admissions"));
+$("tab-stock").addEventListener("click", () => showTab("stock"));
+
+for (const button of document.querySelectorAll("[data-admission-action]")) {
   button.addEventListener("click", async () => {
     const form = $("admission-form");
     if (!form.reportValidity()) return;
     const values = Object.fromEntries(new FormData(form));
     const action = button.dataset.admissionAction;
-    await act("/api/admissions", { ...values, action }, action === "start" ? "Insurance verified. Use Resume chain to continue." : "Admission completed.");
+    const saved = await act("/api/admissions", { ...values, action }, action === "start" ? "Insurance verified" : "Admission completed");
+    if (saved) $("admission-id").value = newAdmissionID();
   });
-});
+}
 
-$("stock-kind").addEventListener("change", (event) => {
-  $("stock-name").value = event.target.value === "pharmacy" ? $("medicine").value : $("equipment").value;
-});
 $("stock-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const values = Object.fromEntries(new FormData(event.target));
-  await act("/api/stock", { ...values, quantity: Number(values.quantity) }, "Stock saved.");
+  await act("/api/stock", { ...values, quantity: Number(values.quantity) }, "Stock saved");
 });
-$("prepare-b").addEventListener("click", async () => {
-  await act("/api/stock", { kind: "equipment", name: $("equipment").value.trim(), quantity: 0 }, "B failure ready. Run full admission with a new ID.");
-});
-$("prepare-c").addEventListener("click", async () => {
-  try {
-    await api("/api/stock", { method: "POST", body: JSON.stringify({ kind: "equipment", name: $("equipment").value.trim(), quantity: 1 }) });
-    await act("/api/stock", { kind: "pharmacy", name: $("medicine").value.trim(), quantity: 0 }, "C failure ready. Run full admission with a new ID.");
-  } catch (error) { notice(error.message, true); }
-});
-$("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, "Chain resumed."));
-$("compensate").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/compensate`, {}, "Admission compensated."));
-$("refresh").addEventListener("click", () => refresh().catch((error) => notice(error.message, true)));
-refresh().catch((error) => notice(error.message, true));
+$("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, "Admission completed"));
+$("compensate").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/compensate`, {}, "Admission compensated"));
+$("refresh").addEventListener("click", () => refresh().catch((failure) => notice(failure.message, true)));
+$("admission-id").value = newAdmissionID();
+refresh().catch((failure) => notice(failure.message, true));

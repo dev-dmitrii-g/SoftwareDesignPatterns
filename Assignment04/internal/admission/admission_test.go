@@ -59,7 +59,6 @@ func request(id string) admission.Admission {
 	return admission.Admission{ID: id, IIN: "990101123456", Policy: "POL-1", Equipment: "wheelchair", Medicine: "paracetamol"}
 }
 
-// DSL: "a hospital with ... admits ... and records ...".
 func (h *hospital) admits(id string) error { h.t.Helper(); return h.intake.Admit(request(id)) }
 func (h *hospital) records(id, status, ins, equip, pharm string) {
 	h.t.Helper()

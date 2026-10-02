@@ -1,8 +1,8 @@
 # Hospital Admission Facade
 
-A small Go CLI demonstrates a Facade coordinating three independent services with durable SQLite state:
+A small Go application coordinates three independent services with durable SQLite state:
 
-1. **Insurance Verifier** checks a 12-digit demo IIN and policy number, then persists `VERIFIED`.
+1. **Insurance Verifier** checks a 12-digit IIN and policy number, then persists `VERIFIED`.
 2. **Equipment Reserver** reserves one named item from SQLite stock.
 3. **Pharmacy Dispatcher** dispatches one named medicine from SQLite stock.
 
@@ -16,15 +16,13 @@ Start the local web server and open **http://127.0.0.1:8080**:
 go run . -db hospital.db serve
 ```
 
-The Bootstrap page lets you set equipment and medicine stock, run the full admission, stop after insurance, resume, inspect all persisted admissions, and manually compensate an incomplete admission. The quick B and C failure buttons set stock for the names currently in the admission form; use a new admission ID each time. The page and CLI use the same `hospital.db` file, so you can restart the server and see the same records. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN, so the page needs internet access for styling.
+The site has **Admissions** and **Stock** tabs. Admissions contains the form, admission table, and status details. Stock contains an editable stock table. A new database starts with five wheelchairs and five paracetamol units, so a normal admission can succeed immediately. To show an equipment failure, set wheelchair quantity to zero and create a new admission. To show a pharmacy failure, set wheelchair quantity above zero and paracetamol quantity to zero. The saved admission details show which steps were reversed. The page and CLI use the same `hospital.db` file. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN.
 
 ## CLI
 
 Requires Go 1.25+, a C compiler (for `go-sqlite3`), and internet access for the first dependency download. From this directory:
 
 ```sh
-go run . -db hospital.db stock equipment wheelchair 1
-go run . -db hospital.db stock pharmacy paracetamol 1
 go run . -db hospital.db admit A001 990101123456 POL-1 wheelchair paracetamol
 go run . -db hospital.db inspect A001
 ```
@@ -36,11 +34,10 @@ The same `hospital.db` file is opened by every command, so state survives closin
 Use separate IDs. These commands work on the same database used above:
 
 ```sh
-# B fails: no wheelchair remains. Only insurance is reversed.
+go run . -db hospital.db stock equipment wheelchair 0
 go run . -db hospital.db admit B001 990101123456 POL-2 wheelchair paracetamol
 go run . -db hospital.db inspect B001
 
-# C fails: make equipment available but medicine unavailable.
 go run . -db hospital.db stock equipment wheelchair 1
 go run . -db hospital.db stock pharmacy paracetamol 0
 go run . -db hospital.db admit C001 990101123456 POL-3 wheelchair paracetamol
@@ -55,14 +52,13 @@ go run . -db hospital.db inspect C001
 go run . -db hospital.db stock equipment wheelchair 1
 go run . -db hospital.db stock pharmacy paracetamol 1
 go run . -db hospital.db start R001 990101123456 POL-4 wheelchair paracetamol
-# This is a new program process; it reads the stored PENDING_B status.
 go run . -db hospital.db resume R001
 go run . -db hospital.db inspect R001
 ```
 
 `start` intentionally stops after A so the restart can be shown live. `compensate ID` manually reverses an incomplete admission. The admin facade refuses to compensate an admission whose medicine was dispatched.
 
-To reset for a fresh demo, delete the database file (and any `hospital.db-wal` or `hospital.db-shm` files) while the app is stopped. The next command recreates it. For example: `rm -f hospital.db hospital.db-wal hospital.db-shm`.
+To reset the database, delete the database file (and any `hospital.db-wal` or `hospital.db-shm` files) while the app is stopped. The next command recreates it with the initial stock. For example: `rm -f hospital.db hospital.db-wal hospital.db-shm`.
 
 ## Design
 
