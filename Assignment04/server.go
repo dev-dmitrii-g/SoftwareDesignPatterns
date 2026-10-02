@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -83,6 +85,14 @@ func readJSON(r *http.Request, dst any) error {
 }
 func bad(w http.ResponseWriter, status int, err error) {
 	writeJSON(w, status, map[string]any{"error": err.Error()})
+}
+
+func newAdmissionID() (string, error) {
+	var value [8]byte
+	if _, err := rand.Read(value[:]); err != nil {
+		return "", err
+	}
+	return "ADM-" + strings.ToUpper(hex.EncodeToString(value[:])), nil
 }
 
 func (s webServer) state(w http.ResponseWriter, r *http.Request) {
@@ -174,6 +184,14 @@ func (s webServer) admit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a := admission.Admission{ID: strings.TrimSpace(req.ID), IIN: strings.TrimSpace(req.IIN), Coverage: strings.TrimSpace(req.Coverage), Equipment: strings.TrimSpace(req.Equipment), Medicine: strings.TrimSpace(req.Medicine)}
+	if a.ID == "" {
+		id, err := newAdmissionID()
+		if err != nil {
+			bad(w, 500, err)
+			return
+		}
+		a.ID = id
+	}
 	var err error
 	switch req.Action {
 	case "start":

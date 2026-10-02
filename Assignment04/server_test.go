@@ -110,7 +110,7 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 		Pharmacy:  pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}},
 	}
 	handler := newServer(db, f, admission.AdminFacade{Intake: f})
-	body := []byte(`{"action":"admit","id":"A1","iin":"990101123456","coverage":"OSMS","equipment":"wheelchair","medicine":"paracetamol"}`)
+	body := []byte(`{"action":"admit","iin":"990101123456","coverage":"OSMS","equipment":"wheelchair","medicine":"paracetamol"}`)
 	req := httptest.NewRequest("POST", "/api/admissions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
@@ -126,6 +126,10 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 	}
 	if result.View.Admission.Status != admission.Completed || result.View.Pharmacy != pharmacy.Dispatched {
 		t.Fatalf("normal admission state: %+v", result.View)
+	}
+	firstID := result.View.Admission.ID
+	if !strings.HasPrefix(firstID, "ADM-") || len(firstID) != 20 {
+		t.Fatalf("generated admission ID: %q", firstID)
 	}
 	post := func(path string, payload any) *httptest.ResponseRecorder {
 		t.Helper()
@@ -147,7 +151,7 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 			t.Fatalf("add stock: %d %s", response.Code, response.Body.String())
 		}
 	}
-	response = post("/api/admissions", map[string]any{"action": "admit", "id": "A2", "iin": "990101123456", "coverage": "OSMS", "equipment": "oxygen monitor", "medicine": "ibuprofen"})
+	response = post("/api/admissions", map[string]any{"action": "admit", "iin": "990101123456", "coverage": "OSMS", "equipment": "oxygen monitor", "medicine": "ibuprofen"})
 	if response.Code != 200 {
 		t.Fatalf("custom stock admission: %d %s", response.Code, response.Body.String())
 	}
@@ -156,5 +160,8 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 	}
 	if result.View.Admission.Status != admission.Completed || result.View.Admission.Equipment != "oxygen monitor" || result.View.Admission.Medicine != "ibuprofen" {
 		t.Fatalf("custom stock state: %+v", result.View)
+	}
+	if result.View.Admission.ID == firstID || !strings.HasPrefix(result.View.Admission.ID, "ADM-") {
+		t.Fatalf("second generated admission ID: %q", result.View.Admission.ID)
 	}
 }

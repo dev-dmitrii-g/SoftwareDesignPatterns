@@ -1,10 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let selectedId = "";
 
-function newAdmissionID() {
-  return `ADM-${Date.now().toString(36).toUpperCase()}`;
-}
-
 function showTab(name) {
   for (const tab of ["admissions", "stock"]) {
     const active = tab === name;
@@ -206,8 +202,7 @@ for (const button of document.querySelectorAll("[data-admission-action]")) {
     if (!form.reportValidity()) return;
     const values = Object.fromEntries(new FormData(form));
     const action = button.dataset.admissionAction;
-    const saved = await act("/api/admissions", { ...values, action }, action === "start" ? "Insurance verified" : "Admission completed");
-    if (saved) $("admission-id").value = newAdmissionID();
+    await act("/api/admissions", { ...values, action }, action === "start" ? "Insurance verified" : "Admission completed");
   });
 }
 
@@ -221,5 +216,4 @@ for (const [formId, kind] of [["equipment-form", "equipment"], ["medicine-form",
 $("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, "Admission completed"));
 $("compensate").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/compensate`, {}, "Admission compensated"));
 $("refresh").addEventListener("click", () => refresh().catch((failure) => notice(failure.message, true)));
-$("admission-id").value = newAdmissionID();
 refresh().catch((failure) => notice(failure.message, true));
