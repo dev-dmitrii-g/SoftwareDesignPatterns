@@ -1,0 +1,98 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"net/http/httptest"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"hospitaladmission/internal/admission"
+	"hospitaladmission/internal/equipment"
+	"hospitaladmission/internal/insurance"
+	"hospitaladmission/internal/pharmacy"
+	"hospitaladmission/internal/store"
+)
+
+func TestWebDemo(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "web.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	i := insurance.Verifier{Rule: insurance.Rule{}, Repository: insurance.Repository{DB: db}}
+	e := equipment.Reserver{Rule: equipment.Rule{}, Repository: equipment.Repository{DB: db}}
+	p := pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}}
+	f := admission.IntakeFacade{Gateway: admission.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
+	handler := newServer(db, f, admission.AdminFacade{Intake: f})
+	get := func(path string) (int, map[string]any) {
+		t.Helper()
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest("GET", path, nil))
+		var body map[string]any
+		if strings.HasPrefix(response.Header().Get("Content-Type"), "application/json") {
+			if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+				t.Fatal(err)
+			}
+		}
+		return response.Code, body
+	}
+	post := func(path string, data any) (int, map[string]any) {
+		t.Helper()
+		raw, err := json.Marshal(data)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request := httptest.NewRequest("POST", path, bytes.NewReader(raw))
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		var body map[string]any
+		if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		return response.Code, body
+	}
+	for _, path := range []string{"/", "/app.css", "/app.js"} {
+		if status, _ := get(path); status != 200 {
+			t.Fatalf("%s: %d", path, status)
+		}
+	}
+	if status, _ := get("/missing"); status != 404 {
+		t.Fatalf("missing page: %d", status)
+	}
+	for _, item := range []map[string]any{{"kind": "equipment", "name": "wheelchair", "quantity": 1}, {"kind": "pharmacy", "name": "paracetamol", "quantity": 0}} {
+		if status, _ := post("/api/stock", item); status != 200 {
+			t.Fatalf("set stock: %d", status)
+		}
+	}
+	request := map[string]any{"action": "admit", "id": "C1", "iin": "990101123456", "policy": "P", "equipment": "wheelchair", "medicine": "paracetamol"}
+	status, body := post("/api/admissions", request)
+	if status != 422 || body["view"].(map[string]any)["Admission"].(map[string]any)["Status"] != admission.Compensated {
+		t.Fatalf("C failure: %d %+v", status, body)
+	}
+	if status, body = get("/api/admissions/C1"); status != 200 || body["view"].(map[string]any)["Equipment"] != equipment.Released {
+		t.Fatalf("inspect: %d %+v", status, body)
+	}
+	if status, body = get("/api/state"); status != 200 || len(body["admissions"].([]any)) != 1 {
+		t.Fatalf("state: %d %+v", status, body)
+	}
+	if status, _ = post("/api/stock", map[string]any{"kind": "pharmacy", "name": "paracetamol", "quantity": 1}); status != 200 {
+		t.Fatalf("set pharmacy stock: %d", status)
+	}
+	request["id"] = "R1"
+	request["action"] = "start"
+	if status, body = post("/api/admissions", request); status != 200 || body["view"].(map[string]any)["Admission"].(map[string]any)["Status"] != admission.PendingB {
+		t.Fatalf("start: %d %+v", status, body)
+	}
+	if status, _ = post("/api/admissions/R1/resume", map[string]any{}); status != 200 {
+		t.Fatalf("resume: %d", status)
+	}
+	if status, _ = post("/api/admissions/R1/compensate", map[string]any{}); status != 422 {
+		t.Fatalf("compensate completed: %d", status)
+	}
+	if status, _ = get("/api/admissions/missing"); status != 404 {
+		t.Fatalf("missing admission: %d", status)
+	}
+}

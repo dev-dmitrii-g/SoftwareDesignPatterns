@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -22,13 +23,15 @@ Commands:
   admit ID IIN POLICY EQUIPMENT MEDICINE  # full chain
   inspect ID
   compensate ID
+  serve                                  # browser UI on 127.0.0.1:8080
 
 IIN is a 12-digit demo identifier. Set stock before admission.
-Example: go run . stock equipment wheelchair 1`)
+Example: go run . serve (use -addr before serve for a different port)`)
 }
 func run(args []string) error {
 	flags := flag.NewFlagSet("hospital", flag.ContinueOnError)
 	path := flags.String("db", "hospital.db", "SQLite database path")
+	addr := flags.String("addr", "127.0.0.1:8080", "web server address")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -48,6 +51,12 @@ func run(args []string) error {
 	f := admission.IntakeFacade{Gateway: admission.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
 	admin := admission.AdminFacade{Intake: f}
 	switch a[0] {
+	case "serve":
+		if len(a) != 1 {
+			return fmt.Errorf("serve takes no arguments")
+		}
+		fmt.Printf("Open http://%s in your browser\n", *addr)
+		return http.ListenAndServe(*addr, newServer(db, f, admin))
 	case "stock":
 		if len(a) != 4 {
 			usage()

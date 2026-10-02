@@ -32,6 +32,22 @@ func (g Gateway) Get(id string) (Admission, error) {
 	err := g.DB.QueryRow(`SELECT id,iin,policy,equipment,medicine,status,reason FROM admissions WHERE id=?`, id).Scan(&a.ID, &a.IIN, &a.Policy, &a.Equipment, &a.Medicine, &a.Status, &a.Reason)
 	return a, err
 }
+func (g Gateway) List() ([]Admission, error) {
+	rows, err := g.DB.Query(`SELECT id,iin,policy,equipment,medicine,status,reason FROM admissions ORDER BY rowid DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Admission{}
+	for rows.Next() {
+		var a Admission
+		if err := rows.Scan(&a.ID, &a.IIN, &a.Policy, &a.Equipment, &a.Medicine, &a.Status, &a.Reason); err != nil {
+			return nil, err
+		}
+		items = append(items, a)
+	}
+	return items, rows.Err()
+}
 func (g Gateway) Update(id, status, reason string) error {
 	_, err := g.DB.Exec(`UPDATE admissions SET status=?,reason=? WHERE id=?`, status, reason, id)
 	return err

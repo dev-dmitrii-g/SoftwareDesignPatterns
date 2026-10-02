@@ -111,6 +111,22 @@ func (g Gateway) Get(id string) (Admission, error) <span class="cov8" title="1">
         err := g.DB.QueryRow(`SELECT id,iin,policy,equipment,medicine,status,reason FROM admissions WHERE id=?`, id).Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Policy, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason)
         return a, err
 }</span>
+func (g Gateway) List() ([]Admission, error) <span class="cov8" title="1">{
+        rows, err := g.DB.Query(`SELECT id,iin,policy,equipment,medicine,status,reason FROM admissions ORDER BY rowid DESC`)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer rows.Close()
+        items := []Admission{}
+        for rows.Next() </span><span class="cov8" title="1">{
+                var a Admission
+                if err := rows.Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Policy, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason); err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">items = append(items, a)</span>
+        }
+        <span class="cov8" title="1">return items, rows.Err()</span>
+}
 func (g Gateway) Update(id, status, reason string) error <span class="cov8" title="1">{
         _, err := g.DB.Exec(`UPDATE admissions SET status=?,reason=? WHERE id=?`, status, reason, id)
         return err

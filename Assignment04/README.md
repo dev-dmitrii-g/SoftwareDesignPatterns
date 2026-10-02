@@ -8,7 +8,17 @@ A small Go CLI demonstrates a Facade coordinating three independent services wit
 
 This is a teaching model. The IIN check only verifies 12 digits; no live Kazakhstan insurance, prescription, or hospital system is contacted.
 
-## Run
+## Browser frontend
+
+Start the local web server and open **http://127.0.0.1:8080**:
+
+```sh
+go run . -db hospital.db serve
+```
+
+The Bootstrap page lets you set equipment and medicine stock, run the full admission, stop after insurance, resume, inspect all persisted admissions, and manually compensate an incomplete admission. The quick B and C failure buttons set stock for the names currently in the admission form; use a new admission ID each time. The page and CLI use the same `hospital.db` file, so you can restart the server and see the same records. Use `-addr 127.0.0.1:9090` before `serve` to change the port. Bootstrap CSS loads from its CDN, so the page needs internet access for styling.
+
+## CLI
 
 Requires Go 1.25+, a C compiler (for `go-sqlite3`), and internet access for the first dependency download. From this directory:
 
@@ -93,7 +103,7 @@ The problem is coordinating an admission across insurance, equipment, and pharma
 
 ```sh
 go test ./...
-go test -coverpkg=./internal/... -coverprofile=coverage.out ./internal/admission
+go test -coverpkg=./internal/... -coverprofile=coverage.out ./...
 go tool cover -func=coverage.out
 go tool cover -html=coverage.out -o coverage.html
 ```
