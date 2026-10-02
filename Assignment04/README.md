@@ -100,4 +100,4 @@ go tool cover -html=coverage.out -o coverage.html
 
 The checked-in [coverage report](coverage.html) and `coverage.out` were generated from these commands. Coverage is **over 80%** across the three subsystems and facades. Tests use a fresh SQLite file in `t.TempDir()` for each case and assert persisted states after reopening it. The test helper reads like a domain sentence: `aHospital(t).stock(...).admits(...)`, followed by `records(...)`.
 
-The project can be placed in a Git repository and pushed to a hosting account for submission. No remote repository URL is included here because one has not been provided.
+This directory is a local Git repository with source and tests committed together. Push it to your hosting account and submit that URL through Moodle; no remote repository was provided here.
