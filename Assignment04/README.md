@@ -20,4 +20,7 @@ go run . -db hospital.db -addr 127.0.0.1:9090
 
 ```sh
 go test ./...
+go test -coverpkg=./internal/... -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out -o coverage.html
+open coverage.html
 ```
