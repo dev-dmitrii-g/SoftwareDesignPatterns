@@ -67,7 +67,7 @@
 
 				<option value="file5">hospitaladmission/internal/pharmacydispatcher/pharmacy.go (85.7%)</option>
 
-				<option value="file6">hospitaladmission/internal/store/store.go (69.4%)</option>
+				<option value="file6">hospitaladmission/internal/store/store.go (62.5%)</option>
 
 				</select>
 			</div>
@@ -647,48 +647,7 @@ func Open(path string) (*sql.DB, error) <span class="cov8" title="1">{
                 db.Close()
                 return nil, fmt.Errorf("initialize database: %w", err)
         }</span>
-        <span class="cov8" title="1">for _, table := range []string{"insurance", "admissions"} </span><span class="cov8" title="1">{
-                if err := migrateCoverage(db, table); err != nil </span><span class="cov0" title="0">{
-                        db.Close()
-                        return nil, fmt.Errorf("migrate %s: %w", table, err)
-                }</span>
-        }
         <span class="cov8" title="1">return db, nil</span>
-}
-
-func migrateCoverage(db *sql.DB, table string) error <span class="cov8" title="1">{
-        rows, err := db.Query("PRAGMA table_info(" + table + ")")
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">hasPolicy, hasCoverage := false, false
-        for rows.Next() </span><span class="cov8" title="1">{
-                var position, required, primaryKey int
-                var name, dataType string
-                var defaultValue sql.NullString
-                if err := rows.Scan(&amp;position, &amp;name, &amp;dataType, &amp;required, &amp;defaultValue, &amp;primaryKey); err != nil </span><span class="cov0" title="0">{
-                        rows.Close()
-                        return err
-                }</span>
-                <span class="cov8" title="1">if name == "policy" </span><span class="cov8" title="1">{
-                        hasPolicy = true
-                }</span>
-                <span class="cov8" title="1">if name == "coverage" </span><span class="cov8" title="1">{
-                        hasCoverage = true
-                }</span>
-        }
-        <span class="cov8" title="1">if err := rows.Err(); err != nil </span><span class="cov0" title="0">{
-                rows.Close()
-                return err
-        }</span>
-        <span class="cov8" title="1">if err := rows.Close(); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if hasPolicy &amp;&amp; !hasCoverage </span><span class="cov8" title="1">{
-                _, err = db.Exec("ALTER TABLE " + table + " RENAME COLUMN policy TO coverage")
-                return err
-        }</span>
-        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 

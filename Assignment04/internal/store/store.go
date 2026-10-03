@@ -24,46 +24,5 @@ func Open(path string) (*sql.DB, error) {
 		db.Close()
 		return nil, fmt.Errorf("initialize database: %w", err)
 	}
-	for _, table := range []string{"insurance", "admissions"} {
-		if err := migrateCoverage(db, table); err != nil {
-			db.Close()
-			return nil, fmt.Errorf("migrate %s: %w", table, err)
-		}
-	}
 	return db, nil
-}
-
-func migrateCoverage(db *sql.DB, table string) error {
-	rows, err := db.Query("PRAGMA table_info(" + table + ")")
-	if err != nil {
-		return err
-	}
-	hasPolicy, hasCoverage := false, false
-	for rows.Next() {
-		var position, required, primaryKey int
-		var name, dataType string
-		var defaultValue sql.NullString
-		if err := rows.Scan(&position, &name, &dataType, &required, &defaultValue, &primaryKey); err != nil {
-			rows.Close()
-			return err
-		}
-		if name == "policy" {
-			hasPolicy = true
-		}
-		if name == "coverage" {
-			hasCoverage = true
-		}
-	}
-	if err := rows.Err(); err != nil {
-		rows.Close()
-		return err
-	}
-	if err := rows.Close(); err != nil {
-		return err
-	}
-	if hasPolicy && !hasCoverage {
-		_, err = db.Exec("ALTER TABLE " + table + " RENAME COLUMN policy TO coverage")
-		return err
-	}
-	return nil
 }

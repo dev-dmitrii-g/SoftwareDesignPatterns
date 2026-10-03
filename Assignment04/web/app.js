@@ -48,7 +48,7 @@ function cell(row, value) {
 function coverageLabel(value) {
   if (value === "NONE") return "No coverage";
   if (["GOBMP", "OSMS", "DMS"].includes(value)) return value;
-  return `Legacy: ${value}`;
+  return value;
 }
 
 function renderAdmissions(items) {
