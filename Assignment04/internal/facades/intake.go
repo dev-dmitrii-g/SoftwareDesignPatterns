@@ -5,16 +5,16 @@ import (
 	"errors"
 	"fmt"
 
-	"hospitaladmission/internal/subsystema"
-	"hospitaladmission/internal/subsystemb"
-	"hospitaladmission/internal/subsystemc"
+	"hospitaladmission/internal/equipmentreserver"
+	"hospitaladmission/internal/insuranceverifier"
+	"hospitaladmission/internal/pharmacydispatcher"
 )
 
 type IntakeFacade struct {
 	Gateway   Gateway
-	Insurance subsystema.Verifier
-	Equipment subsystemb.Reserver
-	Pharmacy  subsystemc.Dispatcher
+	Insurance insuranceverifier.Verifier
+	Equipment equipmentreserver.Reserver
+	Pharmacy  pharmacydispatcher.Dispatcher
 }
 
 func (f IntakeFacade) Start(a Admission) error {
@@ -49,7 +49,7 @@ func (f IntakeFacade) ensureA(a Admission) error {
 		}
 	} else if err != nil {
 		return err
-	} else if v.Status != subsystema.Verified {
+	} else if v.Status != insuranceverifier.Verified {
 		return fmt.Errorf("insurance state %s cannot continue", v.Status)
 	}
 	return f.Gateway.Update(a.ID, PendingB, "")
@@ -82,7 +82,7 @@ func (f IntakeFacade) Resume(id string) error {
 		}
 	} else if err != nil {
 		return err
-	} else if v.Status != subsystemb.Reserved {
+	} else if v.Status != equipmentreserver.Reserved {
 		return fmt.Errorf("equipment state %s cannot continue", v.Status)
 	}
 	if err = f.Gateway.Update(id, PendingC, ""); err != nil {
@@ -95,7 +95,7 @@ func (f IntakeFacade) Resume(id string) error {
 		}
 	} else if err != nil {
 		return err
-	} else if p.Status != subsystemc.Dispatched {
+	} else if p.Status != pharmacydispatcher.Dispatched {
 		return fmt.Errorf("pharmacy state %s cannot continue", p.Status)
 	}
 	return f.Gateway.Update(id, Completed, "")
@@ -114,7 +114,7 @@ func (f IntakeFacade) compensate(id, reason string) error {
 	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
-	if err == nil && b.Status == subsystemb.Reserved {
+	if err == nil && b.Status == equipmentreserver.Reserved {
 		if err = f.Equipment.Release(id); err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (f IntakeFacade) compensate(id, reason string) error {
 	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
-	if err == nil && a.Status == subsystema.Verified {
+	if err == nil && a.Status == insuranceverifier.Verified {
 		if err = f.Insurance.Reverse(id); err != nil {
 			return err
 		}

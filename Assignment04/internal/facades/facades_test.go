@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"hospitaladmission/internal/equipmentreserver"
 	"hospitaladmission/internal/facades"
+	"hospitaladmission/internal/insuranceverifier"
+	"hospitaladmission/internal/pharmacydispatcher"
 	"hospitaladmission/internal/store"
-	"hospitaladmission/internal/subsystema"
-	"hospitaladmission/internal/subsystemb"
-	"hospitaladmission/internal/subsystemc"
 )
 
 type hospital struct {
@@ -40,9 +40,9 @@ func (h *hospital) reopen() {
 	}
 	h.db = db
 	h.intake = facades.IntakeFacade{Gateway: facades.Gateway{DB: db},
-		Insurance: subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}},
-		Equipment: subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}},
-		Pharmacy:  subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}}}
+		Insurance: insuranceverifier.Verifier{Rule: insuranceverifier.Rule{}, Repository: insuranceverifier.Repository{DB: db}},
+		Equipment: equipmentreserver.Reserver{Rule: equipmentreserver.Rule{}, Repository: equipmentreserver.Repository{DB: db}},
+		Pharmacy:  pharmacydispatcher.Dispatcher{Rule: pharmacydispatcher.Rule{}, Repository: pharmacydispatcher.Repository{DB: db}}}
 	h.admin = facades.AdminFacade{Intake: h.intake}
 }
 func (h *hospital) stock(equipmentQty, medicineQty int) *hospital {
@@ -86,7 +86,7 @@ func TestHappyPathAndReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.reopen()
-	h.records("ok", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("ok", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 	if err := h.intake.Resume("ok"); err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestEquipmentFailureCompensatesInsurance(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	h.reopen()
-	h.records("no-equipment", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
+	h.records("no-equipment", facades.Compensated, insuranceverifier.Reversed, "NONE", "NONE")
 	if h.quantity("equipment") != 0 || h.quantity("pharmacy") != 1 {
 		t.Fatal("stock changed on failed step")
 	}
@@ -113,7 +113,7 @@ func TestPharmacyFailureReleasesEquipmentThenReversesInsurance(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	h.reopen()
-	h.records("no-medicine", facades.Compensated, subsystema.Reversed, subsystemb.Released, "NONE")
+	h.records("no-medicine", facades.Compensated, insuranceverifier.Reversed, equipmentreserver.Released, "NONE")
 	if h.quantity("equipment") != 1 {
 		t.Fatal("equipment was not returned")
 	}
@@ -125,11 +125,11 @@ func TestRestartMidChain(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.reopen()
-	h.records("restart", facades.PendingB, subsystema.Verified, "NONE", "NONE")
+	h.records("restart", facades.PendingB, insuranceverifier.Verified, "NONE", "NONE")
 	if err := h.intake.Resume("restart"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("restart", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("restart", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 }
 func TestResumeReadsRowsWhenProgressMarkerIsBehind(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
@@ -144,7 +144,7 @@ func TestResumeReadsRowsWhenProgressMarkerIsBehind(t *testing.T) {
 	if err := h.intake.Resume("lag"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("lag", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("lag", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 	if h.quantity("equipment") != 0 {
 		t.Fatal("equipment reserved twice")
 	}
@@ -166,7 +166,7 @@ func TestManualCompensationAndInvalidInput(t *testing.T) {
 	if err := h.admin.Compensate("manual"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("manual", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
+	h.records("manual", facades.Compensated, insuranceverifier.Reversed, "NONE", "NONE")
 	if err := h.admin.Compensate("manual"); err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 	for _, bad := range []facades.Admission{
 		{IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "bad-coverage", IIN: "990101123456", Equipment: "wheelchair", Medicine: "paracetamol"},
-		{ID: "no-coverage", IIN: "990101123456", Coverage: subsystema.NoCoverage, Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "no-coverage", IIN: "990101123456", Coverage: insuranceverifier.NoCoverage, Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "unknown-coverage", IIN: "990101123456", Coverage: "OTHER", Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "bad-equipment", IIN: "990101123456", Coverage: "OSMS", Medicine: "paracetamol"},
 		{ID: "bad-medicine", IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair"},
@@ -253,11 +253,11 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 	if err := h.admin.Compensate("ok"); err == nil {
 		t.Fatal("completed admission compensated")
 	}
-	p := subsystemc.Dispatch{Status: subsystemc.Dispatched}
-	if err := p.Transition(subsystemc.Cancelled); err != nil {
+	p := pharmacydispatcher.Dispatch{Status: pharmacydispatcher.Dispatched}
+	if err := p.Transition(pharmacydispatcher.Cancelled); err != nil {
 		t.Fatal(err)
 	}
-	if err := p.Transition(subsystemc.Dispatched); err == nil {
+	if err := p.Transition(pharmacydispatcher.Dispatched); err == nil {
 		t.Fatal("illegal pharmacy transition accepted")
 	}
 }
@@ -265,13 +265,13 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 func TestAcceptedCoverageChoices(t *testing.T) {
 	h := aHospital(t).stock(3, 3)
 	defer h.db.Close()
-	for _, coverage := range []string{subsystema.GOBMP, subsystema.OSMS, subsystema.DMS} {
+	for _, coverage := range []string{insuranceverifier.GOBMP, insuranceverifier.OSMS, insuranceverifier.DMS} {
 		request := request(coverage)
 		request.Coverage = coverage
 		if err := h.intake.Admit(request); err != nil {
 			t.Fatalf("%s: %v", coverage, err)
 		}
-		h.records(coverage, facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+		h.records(coverage, facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 	}
 }
 
@@ -285,7 +285,7 @@ func TestResumeFromPersistedPendingAndCompensating(t *testing.T) {
 	if err := h.intake.Resume("pending"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("pending", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("pending", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 	if err := h.intake.Start(request("undo")); err != nil {
 		t.Fatal(err)
 	}
@@ -296,7 +296,7 @@ func TestResumeFromPersistedPendingAndCompensating(t *testing.T) {
 	if err := h.intake.Resume("undo"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("undo", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
+	h.records("undo", facades.Compensated, insuranceverifier.Reversed, "NONE", "NONE")
 }
 
 func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
@@ -312,7 +312,7 @@ func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
 	if err := h.intake.Resume("after-a"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("after-a", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("after-a", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 	if err := h.intake.Start(request("after-c")); err != nil {
 		t.Fatal(err)
 	}
@@ -326,5 +326,5 @@ func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
 	if err := h.intake.Resume("after-c"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("after-c", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
+	h.records("after-c", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
 }

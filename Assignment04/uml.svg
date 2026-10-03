@@ -10,19 +10,19 @@ text{font-family:Arial,Helvetica,sans-serif;fill:#17212b} .title{font-size:25px;
 <rect x="940" y="70" width="225" height="85" rx="7" class="box"/><text x="960" y="101" class="head">Gateway</text><text x="960" y="127" class="small">admissions progress</text>
 <path d="M200 112 L280 112 M620 112 L520 112 M520 145 L940 145" class="line"/>
 <rect x="35" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="55" y="258" class="head">A  Insurance · subsystema</text>
+<text x="55" y="258" class="head">A  insuranceverifier</text>
 <rect x="58" y="285" width="298" height="65" rx="6" class="box"/><text x="74" y="311" class="head">Verifier</text><text x="74" y="334" class="small">Verify · Reverse</text>
 <rect x="58" y="370" width="298" height="65" rx="6" class="box"/><text x="74" y="397" class="head">Rule</text><text x="74" y="420" class="small">Check IIN and coverage</text>
 <rect x="58" y="455" width="298" height="65" rx="6" class="box"/><text x="74" y="481" class="head">Repository</text><text x="74" y="504" class="small">Save · Get</text>
 <rect x="58" y="540" width="298" height="65" rx="6" class="box"/><text x="74" y="567" class="head">Verification</text><text x="74" y="590" class="small">NEW → VERIFIED → REVERSED</text>
 <rect x="427" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="447" y="258" class="head">B  Equipment · subsystemb</text>
+<text x="447" y="258" class="head">B  equipmentreserver</text>
 <rect x="450" y="285" width="298" height="65" rx="6" class="box"/><text x="466" y="311" class="head">Reserver</text><text x="466" y="334" class="small">Reserve · Release</text>
 <rect x="450" y="370" width="298" height="65" rx="6" class="box"/><text x="466" y="397" class="head">Rule</text><text x="466" y="420" class="small">Check item</text>
 <rect x="450" y="455" width="298" height="65" rx="6" class="box"/><text x="466" y="481" class="head">Repository</text><text x="466" y="504" class="small">SetStock · Reserve · Release · Get</text>
 <rect x="450" y="540" width="298" height="65" rx="6" class="box"/><text x="466" y="567" class="head">Reservation</text><text x="466" y="590" class="small">NEW → RESERVED → RELEASED</text>
 <rect x="819" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="839" y="258" class="head">C  Pharmacy · subsystemc</text>
+<text x="839" y="258" class="head">C  pharmacydispatcher</text>
 <rect x="842" y="285" width="298" height="65" rx="6" class="box"/><text x="858" y="311" class="head">Dispatcher</text><text x="858" y="334" class="small">Dispatch</text>
 <rect x="842" y="370" width="298" height="65" rx="6" class="box"/><text x="858" y="397" class="head">Rule</text><text x="858" y="420" class="small">Check medicine</text>
 <rect x="842" y="455" width="298" height="65" rx="6" class="box"/><text x="858" y="481" class="head">Repository</text><text x="858" y="504" class="small">SetStock · Dispatch · Get</text>

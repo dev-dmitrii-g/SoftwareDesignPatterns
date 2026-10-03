@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>facades: Go Coverage Report</title>
+		<title>equipmentreserver: Go Coverage Report</title>
 		<style>
 			body {
 				background: black;
@@ -55,19 +55,19 @@
 			<div id="nav">
 				<select id="files">
 
-				<option value="file0">hospitaladmission/internal/facades/admin.go (86.7%)</option>
+				<option value="file0">hospitaladmission/internal/equipmentreserver/equipment.go (80.4%)</option>
 
-				<option value="file1">hospitaladmission/internal/facades/admission.go (88.9%)</option>
+				<option value="file1">hospitaladmission/internal/facades/admin.go (86.7%)</option>
 
-				<option value="file2">hospitaladmission/internal/facades/intake.go (77.5%)</option>
+				<option value="file2">hospitaladmission/internal/facades/admission.go (88.9%)</option>
 
-				<option value="file3">hospitaladmission/internal/store/store.go (69.4%)</option>
+				<option value="file3">hospitaladmission/internal/facades/intake.go (77.5%)</option>
 
-				<option value="file4">hospitaladmission/internal/subsystema/insurance.go (93.3%)</option>
+				<option value="file4">hospitaladmission/internal/insuranceverifier/insurance.go (93.3%)</option>
 
-				<option value="file5">hospitaladmission/internal/subsystemb/equipment.go (80.4%)</option>
+				<option value="file5">hospitaladmission/internal/pharmacydispatcher/pharmacy.go (85.7%)</option>
 
-				<option value="file6">hospitaladmission/internal/subsystemc/pharmacy.go (85.7%)</option>
+				<option value="file6">hospitaladmission/internal/store/store.go (69.4%)</option>
 
 				</select>
 			</div>
@@ -81,412 +81,7 @@
 		</div>
 		<div id="content">
 
-		<pre class="file" id="file0" style="display: none">package facades
-
-import (
-        "database/sql"
-        "errors"
-
-        "hospitaladmission/internal/subsystemc"
-)
-
-type View struct {
-        Admission                      Admission
-        Insurance, Equipment, Pharmacy string
-}
-
-type AdminFacade struct{ Intake IntakeFacade }
-
-func (f AdminFacade) Inspect(id string) (View, error) <span class="cov8" title="1">{
-        a, err := f.Intake.Gateway.Get(id)
-        if err != nil </span><span class="cov8" title="1">{
-                return View{}, err
-        }</span>
-        <span class="cov8" title="1">v := View{Admission: a, Insurance: "NONE", Equipment: "NONE", Pharmacy: "NONE"}
-        i, e := f.Intake.Insurance.Repository.Get(id)
-        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
-                return View{}, e
-        }</span>
-        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
-                v.Insurance = i.Status
-        }</span>
-        <span class="cov8" title="1">b, e := f.Intake.Equipment.Repository.Get(id)
-        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
-                return View{}, e
-        }</span>
-        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
-                v.Equipment = b.Status
-        }</span>
-        <span class="cov8" title="1">p, e := f.Intake.Pharmacy.Repository.Get(id)
-        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
-                return View{}, e
-        }</span>
-        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
-                v.Pharmacy = p.Status
-        }</span>
-        <span class="cov8" title="1">return v, nil</span>
-}
-func (f AdminFacade) Compensate(id string) error <span class="cov8" title="1">{
-        v, err := f.Inspect(id)
-        if err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if v.Admission.Status == Completed </span><span class="cov8" title="1">{
-                return errors.New("completed admission cannot be manually compensated")
-        }</span>
-        <span class="cov8" title="1">if v.Pharmacy == subsystemc.Dispatched </span><span class="cov0" title="0">{
-                return errors.New("dispatched medicine cannot be manually compensated")
-        }</span>
-        <span class="cov8" title="1">if v.Admission.Status == Compensated </span><span class="cov8" title="1">{
-                return nil
-        }</span>
-        <span class="cov8" title="1">return f.Intake.compensate(id, "manual compensation")</span>
-}
-</pre>
-
-		<pre class="file" id="file1" style="display: none">package facades
-
-import "database/sql"
-
-const (
-        PendingA     = "PENDING_A"
-        PendingB     = "PENDING_B"
-        PendingC     = "PENDING_C"
-        Completed    = "COMPLETED"
-        Compensating = "COMPENSATING"
-        Compensated  = "COMPENSATED"
-)
-
-type Admission struct{ ID, IIN, Coverage, Equipment, Medicine, Status, Reason string }
-
-type Gateway struct{ DB *sql.DB }
-
-func (g Gateway) Create(a Admission) error <span class="cov8" title="1">{
-        _, err := g.DB.Exec(`INSERT INTO admissions(id,iin,coverage,equipment,medicine,status,reason) VALUES(?,?,?,?,?,?,?)`, a.ID, a.IIN, a.Coverage, a.Equipment, a.Medicine, PendingA, "")
-        return err
-}</span>
-func (g Gateway) Get(id string) (Admission, error) <span class="cov8" title="1">{
-        var a Admission
-        err := g.DB.QueryRow(`SELECT id,iin,coverage,equipment,medicine,status,reason FROM admissions WHERE id=?`, id).Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Coverage, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason)
-        return a, err
-}</span>
-func (g Gateway) List() ([]Admission, error) <span class="cov8" title="1">{
-        rows, err := g.DB.Query(`SELECT id,iin,coverage,equipment,medicine,status,reason FROM admissions ORDER BY rowid DESC`)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-        <span class="cov8" title="1">defer rows.Close()
-        items := []Admission{}
-        for rows.Next() </span><span class="cov8" title="1">{
-                var a Admission
-                if err := rows.Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Coverage, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason); err != nil </span><span class="cov0" title="0">{
-                        return nil, err
-                }</span>
-                <span class="cov8" title="1">items = append(items, a)</span>
-        }
-        <span class="cov8" title="1">return items, rows.Err()</span>
-}
-func (g Gateway) Update(id, status, reason string) error <span class="cov8" title="1">{
-        _, err := g.DB.Exec(`UPDATE admissions SET status=?,reason=? WHERE id=?`, status, reason, id)
-        return err
-}</span>
-</pre>
-
-		<pre class="file" id="file2" style="display: none">package facades
-
-import (
-        "database/sql"
-        "errors"
-        "fmt"
-
-        "hospitaladmission/internal/subsystema"
-        "hospitaladmission/internal/subsystemb"
-        "hospitaladmission/internal/subsystemc"
-)
-
-type IntakeFacade struct {
-        Gateway   Gateway
-        Insurance subsystema.Verifier
-        Equipment subsystemb.Reserver
-        Pharmacy  subsystemc.Dispatcher
-}
-
-func (f IntakeFacade) Start(a Admission) error <span class="cov8" title="1">{
-        if a.ID == "" </span><span class="cov8" title="1">{
-                return errors.New("admission ID is required")
-        }</span>
-        <span class="cov8" title="1">if err := f.Insurance.Rule.Check(a.IIN, a.Coverage); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err := f.Equipment.Rule.Check(a.Equipment); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err := f.Pharmacy.Rule.Check(a.Medicine); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err := f.Gateway.Create(a); err != nil </span><span class="cov8" title="1">{
-                return fmt.Errorf("create admission: %w", err)
-        }</span>
-        <span class="cov8" title="1">return f.ensureA(a)</span>
-}
-func (f IntakeFacade) Admit(a Admission) error <span class="cov8" title="1">{
-        if err := f.Start(a); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">return f.Resume(a.ID)</span>
-}
-func (f IntakeFacade) ensureA(a Admission) error <span class="cov8" title="1">{
-        v, err := f.Insurance.Repository.Get(a.ID)
-        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
-                if err = f.Insurance.Verify(a.ID, a.IIN, a.Coverage); err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span> else<span class="cov8" title="1"> if v.Status != subsystema.Verified </span><span class="cov0" title="0">{
-                return fmt.Errorf("insurance state %s cannot continue", v.Status)
-        }</span>
-        <span class="cov8" title="1">return f.Gateway.Update(a.ID, PendingB, "")</span>
-}
-func (f IntakeFacade) Resume(id string) error <span class="cov8" title="1">{
-        a, err := f.Gateway.Get(id)
-        if err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">switch a.Status </span>{
-        case Completed:<span class="cov8" title="1">
-                return nil</span>
-        case Compensated:<span class="cov8" title="1">
-                return errors.New("admission was compensated")</span>
-        case Compensating:<span class="cov8" title="1">
-                return f.compensate(a.ID, a.Reason)</span>
-        case PendingA, PendingB, PendingC:<span class="cov8" title="1"></span>
-        default:<span class="cov0" title="0">
-                return fmt.Errorf("unknown admission status %s", a.Status)</span>
-        }
-        <span class="cov8" title="1">if a.Status == PendingA </span><span class="cov8" title="1">{
-                if err = f.ensureA(a); err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-        }
-        <span class="cov8" title="1">v, err := f.Equipment.Repository.Get(id)
-        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
-                if err = f.Equipment.Reserve(id, a.Equipment); err != nil </span><span class="cov8" title="1">{
-                        return f.fail(id, err)
-                }</span>
-        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span> else<span class="cov8" title="1"> if v.Status != subsystemb.Reserved </span><span class="cov0" title="0">{
-                return fmt.Errorf("equipment state %s cannot continue", v.Status)
-        }</span>
-        <span class="cov8" title="1">if err = f.Gateway.Update(id, PendingC, ""); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">p, err := f.Pharmacy.Repository.Get(id)
-        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
-                if err = f.Pharmacy.Dispatch(id, a.Medicine); err != nil </span><span class="cov8" title="1">{
-                        return f.fail(id, err)
-                }</span>
-        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span> else<span class="cov8" title="1"> if p.Status != subsystemc.Dispatched </span><span class="cov0" title="0">{
-                return fmt.Errorf("pharmacy state %s cannot continue", p.Status)
-        }</span>
-        <span class="cov8" title="1">return f.Gateway.Update(id, Completed, "")</span>
-}
-func (f IntakeFacade) fail(id string, cause error) error <span class="cov8" title="1">{
-        if err := f.compensate(id, cause.Error()); err != nil </span><span class="cov0" title="0">{
-                return fmt.Errorf("%v; compensation failed: %w", cause, err)
-        }</span>
-        <span class="cov8" title="1">return cause</span>
-}
-func (f IntakeFacade) compensate(id, reason string) error <span class="cov8" title="1">{
-        if err := f.Gateway.Update(id, Compensating, reason); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">b, err := f.Equipment.Repository.Get(id)
-        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err == nil &amp;&amp; b.Status == subsystemb.Reserved </span><span class="cov8" title="1">{
-                if err = f.Equipment.Release(id); err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-        }
-        <span class="cov8" title="1">a, err := f.Insurance.Repository.Get(id)
-        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err == nil &amp;&amp; a.Status == subsystema.Verified </span><span class="cov8" title="1">{
-                if err = f.Insurance.Reverse(id); err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-        }
-        <span class="cov8" title="1">return f.Gateway.Update(id, Compensated, reason)</span>
-}
-</pre>
-
-		<pre class="file" id="file3" style="display: none">package store
-
-import (
-        "database/sql"
-        "fmt"
-
-        _ "github.com/mattn/go-sqlite3"
-)
-
-func Open(path string) (*sql.DB, error) <span class="cov8" title="1">{
-        db, err := sql.Open("sqlite3", path)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-        <span class="cov8" title="1">db.SetMaxOpenConns(1)
-        if _, err = db.Exec(`PRAGMA busy_timeout = 5000;
-        CREATE TABLE IF NOT EXISTS insurance (admission_id TEXT PRIMARY KEY, iin TEXT NOT NULL, coverage TEXT NOT NULL, status TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS equipment (admission_id TEXT PRIMARY KEY, item TEXT NOT NULL, status TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS pharmacy (admission_id TEXT PRIMARY KEY, medicine TEXT NOT NULL, status TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS stock (kind TEXT NOT NULL, name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity &gt;= 0), PRIMARY KEY(kind, name));
-        CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, coverage TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');
-        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('equipment','wheelchair',5);
-        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('pharmacy','paracetamol',5);`); err != nil </span><span class="cov0" title="0">{
-                db.Close()
-                return nil, fmt.Errorf("initialize database: %w", err)
-        }</span>
-        <span class="cov8" title="1">for _, table := range []string{"insurance", "admissions"} </span><span class="cov8" title="1">{
-                if err := migrateCoverage(db, table); err != nil </span><span class="cov0" title="0">{
-                        db.Close()
-                        return nil, fmt.Errorf("migrate %s: %w", table, err)
-                }</span>
-        }
-        <span class="cov8" title="1">return db, nil</span>
-}
-
-func migrateCoverage(db *sql.DB, table string) error <span class="cov8" title="1">{
-        rows, err := db.Query("PRAGMA table_info(" + table + ")")
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">hasPolicy, hasCoverage := false, false
-        for rows.Next() </span><span class="cov8" title="1">{
-                var position, required, primaryKey int
-                var name, dataType string
-                var defaultValue sql.NullString
-                if err := rows.Scan(&amp;position, &amp;name, &amp;dataType, &amp;required, &amp;defaultValue, &amp;primaryKey); err != nil </span><span class="cov0" title="0">{
-                        rows.Close()
-                        return err
-                }</span>
-                <span class="cov8" title="1">if name == "policy" </span><span class="cov8" title="1">{
-                        hasPolicy = true
-                }</span>
-                <span class="cov8" title="1">if name == "coverage" </span><span class="cov8" title="1">{
-                        hasCoverage = true
-                }</span>
-        }
-        <span class="cov8" title="1">if err := rows.Err(); err != nil </span><span class="cov0" title="0">{
-                rows.Close()
-                return err
-        }</span>
-        <span class="cov8" title="1">if err := rows.Close(); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if hasPolicy &amp;&amp; !hasCoverage </span><span class="cov8" title="1">{
-                _, err = db.Exec("ALTER TABLE " + table + " RENAME COLUMN policy TO coverage")
-                return err
-        }</span>
-        <span class="cov8" title="1">return nil</span>
-}
-</pre>
-
-		<pre class="file" id="file4" style="display: none">package subsystema
-
-import (
-        "database/sql"
-        "errors"
-        "fmt"
-)
-
-const (
-        New        = "NEW"
-        Verified   = "VERIFIED"
-        Reversed   = "REVERSED"
-        NoCoverage = "NONE"
-        GOBMP      = "GOBMP"
-        OSMS       = "OSMS"
-        DMS        = "DMS"
-)
-
-type Verification struct{ AdmissionID, IIN, Coverage, Status string }
-
-func (v *Verification) Transition(to string) error <span class="cov8" title="1">{
-        if (v.Status == New &amp;&amp; to == Verified) || (v.Status == Verified &amp;&amp; to == Reversed) </span><span class="cov8" title="1">{
-                v.Status = to
-                return nil
-        }</span>
-        <span class="cov8" title="1">return fmt.Errorf("insurance: illegal transition %s -&gt; %s", v.Status, to)</span>
-}
-
-type Rule struct{}
-
-func (Rule) Check(iin, coverage string) error <span class="cov8" title="1">{
-        if len(iin) != 12 </span><span class="cov8" title="1">{
-                return errors.New("IIN must contain 12 digits")
-        }</span>
-        <span class="cov8" title="1">for _, r := range iin </span><span class="cov8" title="1">{
-                if r &lt; '0' || r &gt; '9' </span><span class="cov8" title="1">{
-                        return errors.New("IIN must contain 12 digits")
-                }</span>
-        }
-        <span class="cov8" title="1">switch coverage </span>{
-        case GOBMP, OSMS, DMS:<span class="cov8" title="1">
-                return nil</span>
-        case NoCoverage:<span class="cov8" title="1">
-                return errors.New("no coverage selected")</span>
-        default:<span class="cov8" title="1">
-                return errors.New("choose GOBMP, OSMS, or DMS coverage")</span>
-        }
-}
-
-type Repository struct{ DB *sql.DB }
-
-func (r Repository) Save(v Verification) error <span class="cov8" title="1">{
-        _, err := r.DB.Exec(`INSERT INTO insurance(admission_id,iin,coverage,status) VALUES(?,?,?,?)
-        ON CONFLICT(admission_id) DO UPDATE SET status=excluded.status`, v.AdmissionID, v.IIN, v.Coverage, v.Status)
-        return err
-}</span>
-func (r Repository) Get(id string) (Verification, error) <span class="cov8" title="1">{
-        var v Verification
-        err := r.DB.QueryRow(`SELECT admission_id,iin,coverage,status FROM insurance WHERE admission_id=?`, id).Scan(&amp;v.AdmissionID, &amp;v.IIN, &amp;v.Coverage, &amp;v.Status)
-        return v, err
-}</span>
-
-type Verifier struct {
-        Rule       Rule
-        Repository Repository
-}
-
-func (s Verifier) Verify(id, iin, coverage string) error <span class="cov8" title="1">{
-        if err := s.Rule.Check(iin, coverage); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">v := Verification{id, iin, coverage, New}
-        if err := v.Transition(Verified); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">return s.Repository.Save(v)</span>
-}
-func (s Verifier) Reverse(id string) error <span class="cov8" title="1">{
-        v, err := s.Repository.Get(id)
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">if err = v.Transition(Reversed); err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-        <span class="cov8" title="1">return s.Repository.Save(v)</span>
-}
-</pre>
-
-		<pre class="file" id="file5" style="display: none">package subsystemb
+		<pre class="file" id="file0" style="display: none">package equipmentreserver
 
 import (
         "database/sql"
@@ -605,7 +200,341 @@ func (s Reserver) Release(id string) error <span class="cov8" title="1">{
 }
 </pre>
 
-		<pre class="file" id="file6" style="display: none">package subsystemc
+		<pre class="file" id="file1" style="display: none">package facades
+
+import (
+        "database/sql"
+        "errors"
+
+        "hospitaladmission/internal/pharmacydispatcher"
+)
+
+type View struct {
+        Admission                      Admission
+        Insurance, Equipment, Pharmacy string
+}
+
+type AdminFacade struct{ Intake IntakeFacade }
+
+func (f AdminFacade) Inspect(id string) (View, error) <span class="cov8" title="1">{
+        a, err := f.Intake.Gateway.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return View{}, err
+        }</span>
+        <span class="cov8" title="1">v := View{Admission: a, Insurance: "NONE", Equipment: "NONE", Pharmacy: "NONE"}
+        i, e := f.Intake.Insurance.Repository.Get(id)
+        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return View{}, e
+        }</span>
+        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
+                v.Insurance = i.Status
+        }</span>
+        <span class="cov8" title="1">b, e := f.Intake.Equipment.Repository.Get(id)
+        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return View{}, e
+        }</span>
+        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
+                v.Equipment = b.Status
+        }</span>
+        <span class="cov8" title="1">p, e := f.Intake.Pharmacy.Repository.Get(id)
+        if e != nil &amp;&amp; e != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return View{}, e
+        }</span>
+        <span class="cov8" title="1">if e == nil </span><span class="cov8" title="1">{
+                v.Pharmacy = p.Status
+        }</span>
+        <span class="cov8" title="1">return v, nil</span>
+}
+func (f AdminFacade) Compensate(id string) error <span class="cov8" title="1">{
+        v, err := f.Inspect(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if v.Admission.Status == Completed </span><span class="cov8" title="1">{
+                return errors.New("completed admission cannot be manually compensated")
+        }</span>
+        <span class="cov8" title="1">if v.Pharmacy == pharmacydispatcher.Dispatched </span><span class="cov0" title="0">{
+                return errors.New("dispatched medicine cannot be manually compensated")
+        }</span>
+        <span class="cov8" title="1">if v.Admission.Status == Compensated </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">return f.Intake.compensate(id, "manual compensation")</span>
+}
+</pre>
+
+		<pre class="file" id="file2" style="display: none">package facades
+
+import "database/sql"
+
+const (
+        PendingA     = "PENDING_A"
+        PendingB     = "PENDING_B"
+        PendingC     = "PENDING_C"
+        Completed    = "COMPLETED"
+        Compensating = "COMPENSATING"
+        Compensated  = "COMPENSATED"
+)
+
+type Admission struct{ ID, IIN, Coverage, Equipment, Medicine, Status, Reason string }
+
+type Gateway struct{ DB *sql.DB }
+
+func (g Gateway) Create(a Admission) error <span class="cov8" title="1">{
+        _, err := g.DB.Exec(`INSERT INTO admissions(id,iin,coverage,equipment,medicine,status,reason) VALUES(?,?,?,?,?,?,?)`, a.ID, a.IIN, a.Coverage, a.Equipment, a.Medicine, PendingA, "")
+        return err
+}</span>
+func (g Gateway) Get(id string) (Admission, error) <span class="cov8" title="1">{
+        var a Admission
+        err := g.DB.QueryRow(`SELECT id,iin,coverage,equipment,medicine,status,reason FROM admissions WHERE id=?`, id).Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Coverage, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason)
+        return a, err
+}</span>
+func (g Gateway) List() ([]Admission, error) <span class="cov8" title="1">{
+        rows, err := g.DB.Query(`SELECT id,iin,coverage,equipment,medicine,status,reason FROM admissions ORDER BY rowid DESC`)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer rows.Close()
+        items := []Admission{}
+        for rows.Next() </span><span class="cov8" title="1">{
+                var a Admission
+                if err := rows.Scan(&amp;a.ID, &amp;a.IIN, &amp;a.Coverage, &amp;a.Equipment, &amp;a.Medicine, &amp;a.Status, &amp;a.Reason); err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">items = append(items, a)</span>
+        }
+        <span class="cov8" title="1">return items, rows.Err()</span>
+}
+func (g Gateway) Update(id, status, reason string) error <span class="cov8" title="1">{
+        _, err := g.DB.Exec(`UPDATE admissions SET status=?,reason=? WHERE id=?`, status, reason, id)
+        return err
+}</span>
+</pre>
+
+		<pre class="file" id="file3" style="display: none">package facades
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+
+        "hospitaladmission/internal/equipmentreserver"
+        "hospitaladmission/internal/insuranceverifier"
+        "hospitaladmission/internal/pharmacydispatcher"
+)
+
+type IntakeFacade struct {
+        Gateway   Gateway
+        Insurance insuranceverifier.Verifier
+        Equipment equipmentreserver.Reserver
+        Pharmacy  pharmacydispatcher.Dispatcher
+}
+
+func (f IntakeFacade) Start(a Admission) error <span class="cov8" title="1">{
+        if a.ID == "" </span><span class="cov8" title="1">{
+                return errors.New("admission ID is required")
+        }</span>
+        <span class="cov8" title="1">if err := f.Insurance.Rule.Check(a.IIN, a.Coverage); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := f.Equipment.Rule.Check(a.Equipment); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := f.Pharmacy.Rule.Check(a.Medicine); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := f.Gateway.Create(a); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("create admission: %w", err)
+        }</span>
+        <span class="cov8" title="1">return f.ensureA(a)</span>
+}
+func (f IntakeFacade) Admit(a Admission) error <span class="cov8" title="1">{
+        if err := f.Start(a); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return f.Resume(a.ID)</span>
+}
+func (f IntakeFacade) ensureA(a Admission) error <span class="cov8" title="1">{
+        v, err := f.Insurance.Repository.Get(a.ID)
+        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                if err = f.Insurance.Verify(a.ID, a.IIN, a.Coverage); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span> else<span class="cov8" title="1"> if v.Status != insuranceverifier.Verified </span><span class="cov0" title="0">{
+                return fmt.Errorf("insurance state %s cannot continue", v.Status)
+        }</span>
+        <span class="cov8" title="1">return f.Gateway.Update(a.ID, PendingB, "")</span>
+}
+func (f IntakeFacade) Resume(id string) error <span class="cov8" title="1">{
+        a, err := f.Gateway.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">switch a.Status </span>{
+        case Completed:<span class="cov8" title="1">
+                return nil</span>
+        case Compensated:<span class="cov8" title="1">
+                return errors.New("admission was compensated")</span>
+        case Compensating:<span class="cov8" title="1">
+                return f.compensate(a.ID, a.Reason)</span>
+        case PendingA, PendingB, PendingC:<span class="cov8" title="1"></span>
+        default:<span class="cov0" title="0">
+                return fmt.Errorf("unknown admission status %s", a.Status)</span>
+        }
+        <span class="cov8" title="1">if a.Status == PendingA </span><span class="cov8" title="1">{
+                if err = f.ensureA(a); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">v, err := f.Equipment.Repository.Get(id)
+        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                if err = f.Equipment.Reserve(id, a.Equipment); err != nil </span><span class="cov8" title="1">{
+                        return f.fail(id, err)
+                }</span>
+        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span> else<span class="cov8" title="1"> if v.Status != equipmentreserver.Reserved </span><span class="cov0" title="0">{
+                return fmt.Errorf("equipment state %s cannot continue", v.Status)
+        }</span>
+        <span class="cov8" title="1">if err = f.Gateway.Update(id, PendingC, ""); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">p, err := f.Pharmacy.Repository.Get(id)
+        if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                if err = f.Pharmacy.Dispatch(id, a.Medicine); err != nil </span><span class="cov8" title="1">{
+                        return f.fail(id, err)
+                }</span>
+        } else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span> else<span class="cov8" title="1"> if p.Status != pharmacydispatcher.Dispatched </span><span class="cov0" title="0">{
+                return fmt.Errorf("pharmacy state %s cannot continue", p.Status)
+        }</span>
+        <span class="cov8" title="1">return f.Gateway.Update(id, Completed, "")</span>
+}
+func (f IntakeFacade) fail(id string, cause error) error <span class="cov8" title="1">{
+        if err := f.compensate(id, cause.Error()); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("%v; compensation failed: %w", cause, err)
+        }</span>
+        <span class="cov8" title="1">return cause</span>
+}
+func (f IntakeFacade) compensate(id, reason string) error <span class="cov8" title="1">{
+        if err := f.Gateway.Update(id, Compensating, reason); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">b, err := f.Equipment.Repository.Get(id)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err == nil &amp;&amp; b.Status == equipmentreserver.Reserved </span><span class="cov8" title="1">{
+                if err = f.Equipment.Release(id); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">a, err := f.Insurance.Repository.Get(id)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err == nil &amp;&amp; a.Status == insuranceverifier.Verified </span><span class="cov8" title="1">{
+                if err = f.Insurance.Reverse(id); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return f.Gateway.Update(id, Compensated, reason)</span>
+}
+</pre>
+
+		<pre class="file" id="file4" style="display: none">package insuranceverifier
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+)
+
+const (
+        New        = "NEW"
+        Verified   = "VERIFIED"
+        Reversed   = "REVERSED"
+        NoCoverage = "NONE"
+        GOBMP      = "GOBMP"
+        OSMS       = "OSMS"
+        DMS        = "DMS"
+)
+
+type Verification struct{ AdmissionID, IIN, Coverage, Status string }
+
+func (v *Verification) Transition(to string) error <span class="cov8" title="1">{
+        if (v.Status == New &amp;&amp; to == Verified) || (v.Status == Verified &amp;&amp; to == Reversed) </span><span class="cov8" title="1">{
+                v.Status = to
+                return nil
+        }</span>
+        <span class="cov8" title="1">return fmt.Errorf("insurance: illegal transition %s -&gt; %s", v.Status, to)</span>
+}
+
+type Rule struct{}
+
+func (Rule) Check(iin, coverage string) error <span class="cov8" title="1">{
+        if len(iin) != 12 </span><span class="cov8" title="1">{
+                return errors.New("IIN must contain 12 digits")
+        }</span>
+        <span class="cov8" title="1">for _, r := range iin </span><span class="cov8" title="1">{
+                if r &lt; '0' || r &gt; '9' </span><span class="cov8" title="1">{
+                        return errors.New("IIN must contain 12 digits")
+                }</span>
+        }
+        <span class="cov8" title="1">switch coverage </span>{
+        case GOBMP, OSMS, DMS:<span class="cov8" title="1">
+                return nil</span>
+        case NoCoverage:<span class="cov8" title="1">
+                return errors.New("no coverage selected")</span>
+        default:<span class="cov8" title="1">
+                return errors.New("choose GOBMP, OSMS, or DMS coverage")</span>
+        }
+}
+
+type Repository struct{ DB *sql.DB }
+
+func (r Repository) Save(v Verification) error <span class="cov8" title="1">{
+        _, err := r.DB.Exec(`INSERT INTO insurance(admission_id,iin,coverage,status) VALUES(?,?,?,?)
+        ON CONFLICT(admission_id) DO UPDATE SET status=excluded.status`, v.AdmissionID, v.IIN, v.Coverage, v.Status)
+        return err
+}</span>
+func (r Repository) Get(id string) (Verification, error) <span class="cov8" title="1">{
+        var v Verification
+        err := r.DB.QueryRow(`SELECT admission_id,iin,coverage,status FROM insurance WHERE admission_id=?`, id).Scan(&amp;v.AdmissionID, &amp;v.IIN, &amp;v.Coverage, &amp;v.Status)
+        return v, err
+}</span>
+
+type Verifier struct {
+        Rule       Rule
+        Repository Repository
+}
+
+func (s Verifier) Verify(id, iin, coverage string) error <span class="cov8" title="1">{
+        if err := s.Rule.Check(iin, coverage); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">v := Verification{id, iin, coverage, New}
+        if err := v.Transition(Verified); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return s.Repository.Save(v)</span>
+}
+func (s Verifier) Reverse(id string) error <span class="cov8" title="1">{
+        v, err := s.Repository.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err = v.Transition(Reversed); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return s.Repository.Save(v)</span>
+}
+</pre>
+
+		<pre class="file" id="file5" style="display: none">package pharmacydispatcher
 
 import (
         "database/sql"
@@ -689,6 +618,77 @@ func (s Dispatcher) Dispatch(id, medicine string) error <span class="cov8" title
                 return err
         }</span>
         <span class="cov8" title="1">return s.Repository.Dispatch(v)</span>
+}
+</pre>
+
+		<pre class="file" id="file6" style="display: none">package store
+
+import (
+        "database/sql"
+        "fmt"
+
+        _ "github.com/mattn/go-sqlite3"
+)
+
+func Open(path string) (*sql.DB, error) <span class="cov8" title="1">{
+        db, err := sql.Open("sqlite3", path)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">db.SetMaxOpenConns(1)
+        if _, err = db.Exec(`PRAGMA busy_timeout = 5000;
+        CREATE TABLE IF NOT EXISTS insurance (admission_id TEXT PRIMARY KEY, iin TEXT NOT NULL, coverage TEXT NOT NULL, status TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS equipment (admission_id TEXT PRIMARY KEY, item TEXT NOT NULL, status TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS pharmacy (admission_id TEXT PRIMARY KEY, medicine TEXT NOT NULL, status TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS stock (kind TEXT NOT NULL, name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity &gt;= 0), PRIMARY KEY(kind, name));
+        CREATE TABLE IF NOT EXISTS admissions (id TEXT PRIMARY KEY, iin TEXT NOT NULL, coverage TEXT NOT NULL, equipment TEXT NOT NULL, medicine TEXT NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL DEFAULT '');
+        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('equipment','wheelchair',5);
+        INSERT OR IGNORE INTO stock(kind,name,quantity) VALUES('pharmacy','paracetamol',5);`); err != nil </span><span class="cov0" title="0">{
+                db.Close()
+                return nil, fmt.Errorf("initialize database: %w", err)
+        }</span>
+        <span class="cov8" title="1">for _, table := range []string{"insurance", "admissions"} </span><span class="cov8" title="1">{
+                if err := migrateCoverage(db, table); err != nil </span><span class="cov0" title="0">{
+                        db.Close()
+                        return nil, fmt.Errorf("migrate %s: %w", table, err)
+                }</span>
+        }
+        <span class="cov8" title="1">return db, nil</span>
+}
+
+func migrateCoverage(db *sql.DB, table string) error <span class="cov8" title="1">{
+        rows, err := db.Query("PRAGMA table_info(" + table + ")")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">hasPolicy, hasCoverage := false, false
+        for rows.Next() </span><span class="cov8" title="1">{
+                var position, required, primaryKey int
+                var name, dataType string
+                var defaultValue sql.NullString
+                if err := rows.Scan(&amp;position, &amp;name, &amp;dataType, &amp;required, &amp;defaultValue, &amp;primaryKey); err != nil </span><span class="cov0" title="0">{
+                        rows.Close()
+                        return err
+                }</span>
+                <span class="cov8" title="1">if name == "policy" </span><span class="cov8" title="1">{
+                        hasPolicy = true
+                }</span>
+                <span class="cov8" title="1">if name == "coverage" </span><span class="cov8" title="1">{
+                        hasCoverage = true
+                }</span>
+        }
+        <span class="cov8" title="1">if err := rows.Err(); err != nil </span><span class="cov0" title="0">{
+                rows.Close()
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := rows.Close(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if hasPolicy &amp;&amp; !hasCoverage </span><span class="cov8" title="1">{
+                _, err = db.Exec("ALTER TABLE " + table + " RENAME COLUMN policy TO coverage")
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 

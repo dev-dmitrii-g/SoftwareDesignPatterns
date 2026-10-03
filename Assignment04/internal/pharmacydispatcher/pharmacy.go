@@ -1,4 +1,4 @@
-package subsystemc
+package pharmacydispatcher
 
 import (
 	"database/sql"

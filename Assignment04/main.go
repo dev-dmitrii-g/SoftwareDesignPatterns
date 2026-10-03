@@ -7,11 +7,11 @@ import (
 	"os"
 	"strconv"
 
+	"hospitaladmission/internal/equipmentreserver"
 	"hospitaladmission/internal/facades"
+	"hospitaladmission/internal/insuranceverifier"
+	"hospitaladmission/internal/pharmacydispatcher"
 	"hospitaladmission/internal/store"
-	"hospitaladmission/internal/subsystema"
-	"hospitaladmission/internal/subsystemb"
-	"hospitaladmission/internal/subsystemc"
 )
 
 func usage() {
@@ -45,9 +45,9 @@ func run(args []string) error {
 		return err
 	}
 	defer db.Close()
-	i := subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}}
-	e := subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}}
-	p := subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}}
+	i := insuranceverifier.Verifier{Rule: insuranceverifier.Rule{}, Repository: insuranceverifier.Repository{DB: db}}
+	e := equipmentreserver.Reserver{Rule: equipmentreserver.Rule{}, Repository: equipmentreserver.Repository{DB: db}}
+	p := pharmacydispatcher.Dispatcher{Rule: pharmacydispatcher.Rule{}, Repository: pharmacydispatcher.Repository{DB: db}}
 	f := facades.IntakeFacade{Gateway: facades.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
 	admin := facades.AdminFacade{Intake: f}
 	switch a[0] {

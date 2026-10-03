@@ -1,4 +1,4 @@
-package subsystemb
+package equipmentreserver
 
 import (
 	"database/sql"

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"hospitaladmission/internal/equipmentreserver"
 	"hospitaladmission/internal/facades"
+	"hospitaladmission/internal/insuranceverifier"
+	"hospitaladmission/internal/pharmacydispatcher"
 	"hospitaladmission/internal/store"
-	"hospitaladmission/internal/subsystema"
-	"hospitaladmission/internal/subsystemb"
-	"hospitaladmission/internal/subsystemc"
 )
 
 func TestWebDemo(t *testing.T) {
@@ -21,9 +21,9 @@ func TestWebDemo(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	i := subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}}
-	e := subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}}
-	p := subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}}
+	i := insuranceverifier.Verifier{Rule: insuranceverifier.Rule{}, Repository: insuranceverifier.Repository{DB: db}}
+	e := equipmentreserver.Reserver{Rule: equipmentreserver.Rule{}, Repository: equipmentreserver.Repository{DB: db}}
+	p := pharmacydispatcher.Dispatcher{Rule: pharmacydispatcher.Rule{}, Repository: pharmacydispatcher.Repository{DB: db}}
 	f := facades.IntakeFacade{Gateway: facades.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
 	handler := newServer(db, f, facades.AdminFacade{Intake: f})
 	get := func(path string) (int, map[string]any) {
@@ -72,7 +72,7 @@ func TestWebDemo(t *testing.T) {
 	if status != 422 || body["view"].(map[string]any)["Admission"].(map[string]any)["Status"] != facades.Compensated {
 		t.Fatalf("C failure: %d %+v", status, body)
 	}
-	if status, body = get("/api/admissions/C1"); status != 200 || body["view"].(map[string]any)["Equipment"] != subsystemb.Released {
+	if status, body = get("/api/admissions/C1"); status != 200 || body["view"].(map[string]any)["Equipment"] != equipmentreserver.Released {
 		t.Fatalf("inspect: %d %+v", status, body)
 	}
 	if status, body = get("/api/state"); status != 200 || len(body["admissions"].([]any)) != 1 {
@@ -105,9 +105,9 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 	defer db.Close()
 	f := facades.IntakeFacade{
 		Gateway:   facades.Gateway{DB: db},
-		Insurance: subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}},
-		Equipment: subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}},
-		Pharmacy:  subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}},
+		Insurance: insuranceverifier.Verifier{Rule: insuranceverifier.Rule{}, Repository: insuranceverifier.Repository{DB: db}},
+		Equipment: equipmentreserver.Reserver{Rule: equipmentreserver.Rule{}, Repository: equipmentreserver.Repository{DB: db}},
+		Pharmacy:  pharmacydispatcher.Dispatcher{Rule: pharmacydispatcher.Rule{}, Repository: pharmacydispatcher.Repository{DB: db}},
 	}
 	handler := newServer(db, f, facades.AdminFacade{Intake: f})
 	body := []byte(`{"action":"admit","iin":"990101123456","coverage":"OSMS","equipment":"wheelchair","medicine":"paracetamol"}`)
@@ -124,7 +124,7 @@ func TestWebNormalAdmissionUsesInitialStock(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.View.Admission.Status != facades.Completed || result.View.Pharmacy != subsystemc.Dispatched {
+	if result.View.Admission.Status != facades.Completed || result.View.Pharmacy != pharmacydispatcher.Dispatched {
 		t.Fatalf("normal admission state: %+v", result.View)
 	}
 	firstID := result.View.Admission.ID

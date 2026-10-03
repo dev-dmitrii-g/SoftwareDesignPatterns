@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"hospitaladmission/internal/subsystemc"
+	"hospitaladmission/internal/pharmacydispatcher"
 )
 
 type View struct {
@@ -51,7 +51,7 @@ func (f AdminFacade) Compensate(id string) error {
 	if v.Admission.Status == Completed {
 		return errors.New("completed admission cannot be manually compensated")
 	}
-	if v.Pharmacy == subsystemc.Dispatched {
+	if v.Pharmacy == pharmacydispatcher.Dispatched {
 		return errors.New("dispatched medicine cannot be manually compensated")
 	}
 	if v.Admission.Status == Compensated {

@@ -11,9 +11,9 @@ A small Go application coordinates three independent services with durable SQLit
 | Package | Role |
 | --- | --- |
 | `internal/facades` | Admission model and gateway, `IntakeFacade`, and `AdminFacade` |
-| `internal/subsystema` | Insurance Verifier and its rule, entity, and repository |
-| `internal/subsystemb` | Equipment Reserver and its rule, entity, and repository |
-| `internal/subsystemc` | Pharmacy Dispatcher and its rule, entity, and repository |
+| `internal/insuranceverifier` | Insurance Verifier and its rule, entity, and repository |
+| `internal/equipmentreserver` | Equipment Reserver and its rule, entity, and repository |
+| `internal/pharmacydispatcher` | Pharmacy Dispatcher and its rule, entity, and repository |
 | `internal/store` | SQLite setup and schema migration |
 
 `main.go` assembles these packages for the CLI and web server. `server.go` handles HTTP requests; `web/` contains the Bootstrap page.

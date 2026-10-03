@@ -1,4 +1,4 @@
-package subsystema
+package insuranceverifier
 
 import (
 	"database/sql"
