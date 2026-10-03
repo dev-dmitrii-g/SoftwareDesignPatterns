@@ -1,4 +1,4 @@
-package equipment
+package subsystemb
 
 import (
 	"database/sql"

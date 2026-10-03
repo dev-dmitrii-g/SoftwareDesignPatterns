@@ -1,4 +1,4 @@
-package insurance
+package subsystema
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package admission_test
+package facades_test
 
 import (
 	"database/sql"
@@ -6,19 +6,19 @@ import (
 	"strings"
 	"testing"
 
-	"hospitaladmission/internal/admission"
-	"hospitaladmission/internal/equipment"
-	"hospitaladmission/internal/insurance"
-	"hospitaladmission/internal/pharmacy"
+	"hospitaladmission/internal/facades"
 	"hospitaladmission/internal/store"
+	"hospitaladmission/internal/subsystema"
+	"hospitaladmission/internal/subsystemb"
+	"hospitaladmission/internal/subsystemc"
 )
 
 type hospital struct {
 	t      *testing.T
 	path   string
 	db     *sql.DB
-	intake admission.IntakeFacade
-	admin  admission.AdminFacade
+	intake facades.IntakeFacade
+	admin  facades.AdminFacade
 }
 
 func aHospital(t *testing.T) *hospital {
@@ -39,11 +39,11 @@ func (h *hospital) reopen() {
 		h.t.Fatal(err)
 	}
 	h.db = db
-	h.intake = admission.IntakeFacade{Gateway: admission.Gateway{DB: db},
-		Insurance: insurance.Verifier{Rule: insurance.Rule{}, Repository: insurance.Repository{DB: db}},
-		Equipment: equipment.Reserver{Rule: equipment.Rule{}, Repository: equipment.Repository{DB: db}},
-		Pharmacy:  pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}}}
-	h.admin = admission.AdminFacade{Intake: h.intake}
+	h.intake = facades.IntakeFacade{Gateway: facades.Gateway{DB: db},
+		Insurance: subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}},
+		Equipment: subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}},
+		Pharmacy:  subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}}}
+	h.admin = facades.AdminFacade{Intake: h.intake}
 }
 func (h *hospital) stock(equipmentQty, medicineQty int) *hospital {
 	h.t.Helper()
@@ -55,8 +55,8 @@ func (h *hospital) stock(equipmentQty, medicineQty int) *hospital {
 	}
 	return h
 }
-func request(id string) admission.Admission {
-	return admission.Admission{ID: id, IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"}
+func request(id string) facades.Admission {
+	return facades.Admission{ID: id, IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"}
 }
 
 func (h *hospital) admits(id string) error { h.t.Helper(); return h.intake.Admit(request(id)) }
@@ -86,7 +86,7 @@ func TestHappyPathAndReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.reopen()
-	h.records("ok", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("ok", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 	if err := h.intake.Resume("ok"); err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestEquipmentFailureCompensatesInsurance(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	h.reopen()
-	h.records("no-equipment", admission.Compensated, insurance.Reversed, "NONE", "NONE")
+	h.records("no-equipment", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
 	if h.quantity("equipment") != 0 || h.quantity("pharmacy") != 1 {
 		t.Fatal("stock changed on failed step")
 	}
@@ -113,7 +113,7 @@ func TestPharmacyFailureReleasesEquipmentThenReversesInsurance(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	h.reopen()
-	h.records("no-medicine", admission.Compensated, insurance.Reversed, equipment.Released, "NONE")
+	h.records("no-medicine", facades.Compensated, subsystema.Reversed, subsystemb.Released, "NONE")
 	if h.quantity("equipment") != 1 {
 		t.Fatal("equipment was not returned")
 	}
@@ -125,11 +125,11 @@ func TestRestartMidChain(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.reopen()
-	h.records("restart", admission.PendingB, insurance.Verified, "NONE", "NONE")
+	h.records("restart", facades.PendingB, subsystema.Verified, "NONE", "NONE")
 	if err := h.intake.Resume("restart"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("restart", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("restart", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 }
 func TestResumeReadsRowsWhenProgressMarkerIsBehind(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
@@ -144,7 +144,7 @@ func TestResumeReadsRowsWhenProgressMarkerIsBehind(t *testing.T) {
 	if err := h.intake.Resume("lag"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("lag", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("lag", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 	if h.quantity("equipment") != 0 {
 		t.Fatal("equipment reserved twice")
 	}
@@ -166,7 +166,7 @@ func TestManualCompensationAndInvalidInput(t *testing.T) {
 	if err := h.admin.Compensate("manual"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("manual", admission.Compensated, insurance.Reversed, "NONE", "NONE")
+	h.records("manual", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
 	if err := h.admin.Compensate("manual"); err != nil {
 		t.Fatal(err)
 	}
@@ -216,10 +216,10 @@ func TestSubsystemsWorkAloneAndRejectIllegalTransitions(t *testing.T) {
 func TestValidationAndAdministrativeGuards(t *testing.T) {
 	h := aHospital(t).stock(1, 1)
 	defer h.db.Close()
-	for _, bad := range []admission.Admission{
+	for _, bad := range []facades.Admission{
 		{IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "bad-coverage", IIN: "990101123456", Equipment: "wheelchair", Medicine: "paracetamol"},
-		{ID: "no-coverage", IIN: "990101123456", Coverage: insurance.NoCoverage, Equipment: "wheelchair", Medicine: "paracetamol"},
+		{ID: "no-coverage", IIN: "990101123456", Coverage: subsystema.NoCoverage, Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "unknown-coverage", IIN: "990101123456", Coverage: "OTHER", Equipment: "wheelchair", Medicine: "paracetamol"},
 		{ID: "bad-equipment", IIN: "990101123456", Coverage: "OSMS", Medicine: "paracetamol"},
 		{ID: "bad-medicine", IIN: "990101123456", Coverage: "OSMS", Equipment: "wheelchair"},
@@ -253,11 +253,11 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 	if err := h.admin.Compensate("ok"); err == nil {
 		t.Fatal("completed admission compensated")
 	}
-	p := pharmacy.Dispatch{Status: pharmacy.Dispatched}
-	if err := p.Transition(pharmacy.Cancelled); err != nil {
+	p := subsystemc.Dispatch{Status: subsystemc.Dispatched}
+	if err := p.Transition(subsystemc.Cancelled); err != nil {
 		t.Fatal(err)
 	}
-	if err := p.Transition(pharmacy.Dispatched); err == nil {
+	if err := p.Transition(subsystemc.Dispatched); err == nil {
 		t.Fatal("illegal pharmacy transition accepted")
 	}
 }
@@ -265,13 +265,13 @@ func TestValidationAndAdministrativeGuards(t *testing.T) {
 func TestAcceptedCoverageChoices(t *testing.T) {
 	h := aHospital(t).stock(3, 3)
 	defer h.db.Close()
-	for _, coverage := range []string{insurance.GOBMP, insurance.OSMS, insurance.DMS} {
+	for _, coverage := range []string{subsystema.GOBMP, subsystema.OSMS, subsystema.DMS} {
 		request := request(coverage)
 		request.Coverage = coverage
 		if err := h.intake.Admit(request); err != nil {
 			t.Fatalf("%s: %v", coverage, err)
 		}
-		h.records(coverage, admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+		h.records(coverage, facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 	}
 }
 
@@ -285,18 +285,18 @@ func TestResumeFromPersistedPendingAndCompensating(t *testing.T) {
 	if err := h.intake.Resume("pending"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("pending", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("pending", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 	if err := h.intake.Start(request("undo")); err != nil {
 		t.Fatal(err)
 	}
-	if err := h.intake.Gateway.Update("undo", admission.Compensating, "operator stopped"); err != nil {
+	if err := h.intake.Gateway.Update("undo", facades.Compensating, "operator stopped"); err != nil {
 		t.Fatal(err)
 	}
 	h.reopen()
 	if err := h.intake.Resume("undo"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("undo", admission.Compensated, insurance.Reversed, "NONE", "NONE")
+	h.records("undo", facades.Compensated, subsystema.Reversed, "NONE", "NONE")
 }
 
 func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
@@ -312,7 +312,7 @@ func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
 	if err := h.intake.Resume("after-a"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("after-a", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("after-a", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 	if err := h.intake.Start(request("after-c")); err != nil {
 		t.Fatal(err)
 	}
@@ -326,5 +326,5 @@ func TestResumeAfterCommittedStepBeforeProgressUpdate(t *testing.T) {
 	if err := h.intake.Resume("after-c"); err != nil {
 		t.Fatal(err)
 	}
-	h.records("after-c", admission.Completed, insurance.Verified, equipment.Reserved, pharmacy.Dispatched)
+	h.records("after-c", facades.Completed, subsystema.Verified, subsystemb.Reserved, subsystemc.Dispatched)
 }

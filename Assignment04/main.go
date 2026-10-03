@@ -7,11 +7,11 @@ import (
 	"os"
 	"strconv"
 
-	"hospitaladmission/internal/admission"
-	"hospitaladmission/internal/equipment"
-	"hospitaladmission/internal/insurance"
-	"hospitaladmission/internal/pharmacy"
+	"hospitaladmission/internal/facades"
 	"hospitaladmission/internal/store"
+	"hospitaladmission/internal/subsystema"
+	"hospitaladmission/internal/subsystemb"
+	"hospitaladmission/internal/subsystemc"
 )
 
 func usage() {
@@ -45,11 +45,11 @@ func run(args []string) error {
 		return err
 	}
 	defer db.Close()
-	i := insurance.Verifier{Rule: insurance.Rule{}, Repository: insurance.Repository{DB: db}}
-	e := equipment.Reserver{Rule: equipment.Rule{}, Repository: equipment.Repository{DB: db}}
-	p := pharmacy.Dispatcher{Rule: pharmacy.Rule{}, Repository: pharmacy.Repository{DB: db}}
-	f := admission.IntakeFacade{Gateway: admission.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
-	admin := admission.AdminFacade{Intake: f}
+	i := subsystema.Verifier{Rule: subsystema.Rule{}, Repository: subsystema.Repository{DB: db}}
+	e := subsystemb.Reserver{Rule: subsystemb.Rule{}, Repository: subsystemb.Repository{DB: db}}
+	p := subsystemc.Dispatcher{Rule: subsystemc.Rule{}, Repository: subsystemc.Repository{DB: db}}
+	f := facades.IntakeFacade{Gateway: facades.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
+	admin := facades.AdminFacade{Intake: f}
 	switch a[0] {
 	case "serve":
 		if len(a) != 1 {
@@ -83,7 +83,7 @@ func run(args []string) error {
 			usage()
 			return fmt.Errorf("%s needs ID, IIN, coverage, equipment, medicine", a[0])
 		}
-		request := admission.Admission{ID: a[1], IIN: a[2], Coverage: a[3], Equipment: a[4], Medicine: a[5]}
+		request := facades.Admission{ID: a[1], IIN: a[2], Coverage: a[3], Equipment: a[4], Medicine: a[5]}
 		if a[0] == "start" {
 			err = f.Start(request)
 		} else {
@@ -124,7 +124,7 @@ func run(args []string) error {
 		return fmt.Errorf("unknown command %q", a[0])
 	}
 }
-func printView(f admission.AdminFacade, id string) error {
+func printView(f facades.AdminFacade, id string) error {
 	v, err := f.Inspect(id)
 	if err != nil {
 		return err

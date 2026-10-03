@@ -6,6 +6,18 @@ A small Go application coordinates three independent services with durable SQLit
 2. **Equipment Reserver** reserves one named item from SQLite stock.
 3. **Pharmacy Dispatcher** dispatches one named medicine from SQLite stock.
 
+## Project structure
+
+| Package | Role |
+| --- | --- |
+| `internal/facades` | Admission model and gateway, `IntakeFacade`, and `AdminFacade` |
+| `internal/subsystema` | Insurance Verifier and its rule, entity, and repository |
+| `internal/subsystemb` | Equipment Reserver and its rule, entity, and repository |
+| `internal/subsystemc` | Pharmacy Dispatcher and its rule, entity, and repository |
+| `internal/store` | SQLite setup and schema migration |
+
+`main.go` assembles these packages for the CLI and web server. `server.go` handles HTTP requests; `web/` contains the Bootstrap page.
+
 Coverage choices are `GOBMP` (guaranteed state package), `OSMS` (mandatory social health insurance), `DMS` (voluntary insurance), and `NONE` (no coverage). The IIN check only verifies 12 digits; no live Kazakhstan insurance, prescription, or hospital system is contacted. `NONE` stops this planned admission at the first step. This local rule does not assess a person's entitlement to state-funded care; GOBMP can apply regardless of OSMS status. Existing `policy` columns are renamed to `coverage` when an older database is opened, preserving old values.
 
 Coverage categories follow [Kazakhstan government information on GOBMP and OSMS](https://www.gov.kz/article/171880?lang=ru) and [government information on voluntary medical insurance](https://www.gov.kz/situations/722/intro?lang=ru).

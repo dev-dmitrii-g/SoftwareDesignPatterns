@@ -12,16 +12,16 @@ import (
 	"os"
 	"strings"
 
-	"hospitaladmission/internal/admission"
+	"hospitaladmission/internal/facades"
 )
 
 type webServer struct {
 	db     *sql.DB
-	intake admission.IntakeFacade
-	admin  admission.AdminFacade
+	intake facades.IntakeFacade
+	admin  facades.AdminFacade
 }
 
-func newServer(db *sql.DB, intake admission.IntakeFacade, admin admission.AdminFacade) http.Handler {
+func newServer(db *sql.DB, intake facades.IntakeFacade, admin facades.AdminFacade) http.Handler {
 	s := webServer{db: db, intake: intake, admin: admin}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.index)
@@ -101,7 +101,7 @@ func (s webServer) state(w http.ResponseWriter, r *http.Request) {
 		bad(w, 500, err)
 		return
 	}
-	views := make([]admission.View, 0, len(items))
+	views := make([]facades.View, 0, len(items))
 	for _, item := range items {
 		v, err := s.admin.Inspect(item.ID)
 		if err != nil {
@@ -183,7 +183,7 @@ func (s webServer) admit(w http.ResponseWriter, r *http.Request) {
 		bad(w, 400, err)
 		return
 	}
-	a := admission.Admission{ID: strings.TrimSpace(req.ID), IIN: strings.TrimSpace(req.IIN), Coverage: strings.TrimSpace(req.Coverage), Equipment: strings.TrimSpace(req.Equipment), Medicine: strings.TrimSpace(req.Medicine)}
+	a := facades.Admission{ID: strings.TrimSpace(req.ID), IIN: strings.TrimSpace(req.IIN), Coverage: strings.TrimSpace(req.Coverage), Equipment: strings.TrimSpace(req.Equipment), Medicine: strings.TrimSpace(req.Medicine)}
 	if a.ID == "" {
 		id, err := newAdmissionID()
 		if err != nil {

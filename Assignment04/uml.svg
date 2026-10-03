@@ -5,24 +5,24 @@ text{font-family:Arial,Helvetica,sans-serif;fill:#17212b} .title{font-size:25px;
 <defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 Z" fill="#55718a"/></marker></defs>
 <text x="35" y="43" class="title">Hospital Admission Facade Class Diagram</text>
 <rect x="35" y="80" width="165" height="65" rx="7" class="box"/><text x="55" y="119" class="head">CLI Client</text>
-<rect x="280" y="70" width="240" height="85" rx="7" class="box"/><text x="300" y="101" class="head">IntakeFacade</text><text x="300" y="127" class="small">Start · Admit · Resume</text>
-<rect x="620" y="70" width="245" height="85" rx="7" class="box"/><text x="640" y="101" class="head">AdminFacade</text><text x="640" y="127" class="small">Inspect · Compensate</text>
+<rect x="280" y="70" width="240" height="85" rx="7" class="box"/><text x="300" y="101" class="head">IntakeFacade</text><text x="300" y="127" class="small">facades · Start · Admit · Resume</text>
+<rect x="620" y="70" width="245" height="85" rx="7" class="box"/><text x="640" y="101" class="head">AdminFacade</text><text x="640" y="127" class="small">facades · Inspect · Compensate</text>
 <rect x="940" y="70" width="225" height="85" rx="7" class="box"/><text x="960" y="101" class="head">Gateway</text><text x="960" y="127" class="small">admissions progress</text>
 <path d="M200 112 L280 112 M620 112 L520 112 M520 145 L940 145" class="line"/>
 <rect x="35" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="55" y="258" class="head">A  Insurance Verifier</text>
+<text x="55" y="258" class="head">A  Insurance · subsystema</text>
 <rect x="58" y="285" width="298" height="65" rx="6" class="box"/><text x="74" y="311" class="head">Verifier</text><text x="74" y="334" class="small">Verify · Reverse</text>
 <rect x="58" y="370" width="298" height="65" rx="6" class="box"/><text x="74" y="397" class="head">Rule</text><text x="74" y="420" class="small">Check IIN and coverage</text>
 <rect x="58" y="455" width="298" height="65" rx="6" class="box"/><text x="74" y="481" class="head">Repository</text><text x="74" y="504" class="small">Save · Get</text>
 <rect x="58" y="540" width="298" height="65" rx="6" class="box"/><text x="74" y="567" class="head">Verification</text><text x="74" y="590" class="small">NEW → VERIFIED → REVERSED</text>
 <rect x="427" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="447" y="258" class="head">B  Equipment Reserver</text>
+<text x="447" y="258" class="head">B  Equipment · subsystemb</text>
 <rect x="450" y="285" width="298" height="65" rx="6" class="box"/><text x="466" y="311" class="head">Reserver</text><text x="466" y="334" class="small">Reserve · Release</text>
 <rect x="450" y="370" width="298" height="65" rx="6" class="box"/><text x="466" y="397" class="head">Rule</text><text x="466" y="420" class="small">Check item</text>
 <rect x="450" y="455" width="298" height="65" rx="6" class="box"/><text x="466" y="481" class="head">Repository</text><text x="466" y="504" class="small">SetStock · Reserve · Release · Get</text>
 <rect x="450" y="540" width="298" height="65" rx="6" class="box"/><text x="466" y="567" class="head">Reservation</text><text x="466" y="590" class="small">NEW → RESERVED → RELEASED</text>
 <rect x="819" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="839" y="258" class="head">C  Pharmacy Dispatcher</text>
+<text x="839" y="258" class="head">C  Pharmacy · subsystemc</text>
 <rect x="842" y="285" width="298" height="65" rx="6" class="box"/><text x="858" y="311" class="head">Dispatcher</text><text x="858" y="334" class="small">Dispatch</text>
 <rect x="842" y="370" width="298" height="65" rx="6" class="box"/><text x="858" y="397" class="head">Rule</text><text x="858" y="420" class="small">Check medicine</text>
 <rect x="842" y="455" width="298" height="65" rx="6" class="box"/><text x="858" y="481" class="head">Repository</text><text x="858" y="504" class="small">SetStock · Dispatch · Get</text>
