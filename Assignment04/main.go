@@ -32,7 +32,7 @@ func run(args []string) error {
 	e := equipmentreserver.Reserver{Rule: equipmentreserver.Rule{}, Repository: equipmentreserver.Repository{DB: db}}
 	p := pharmacydispatcher.Dispatcher{Rule: pharmacydispatcher.Rule{}, Repository: pharmacydispatcher.Repository{DB: db}}
 	f := facades.IntakeFacade{Gateway: facades.Gateway{DB: db}, Insurance: i, Equipment: e, Pharmacy: p}
-	fmt.Printf("Open http://%s in your browser\n", *addr)
+	fmt.Printf("http://%s\n", *addr)
 	return http.ListenAndServe(*addr, newServer(db, f, facades.AdminFacade{Intake: f}))
 }
 
