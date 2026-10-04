@@ -94,6 +94,70 @@ func TestHappyPathAndReload(t *testing.T) {
 		t.Fatal("stock was not consumed exactly once")
 	}
 }
+func TestStepwiseAdmissionAndRelease(t *testing.T) {
+	h := aHospital(t).stock(2, 2)
+	defer h.db.Close()
+	if err := h.intake.Start(request("steps")); err != nil {
+		t.Fatal(err)
+	}
+	h.records("steps", facades.PendingB, insuranceverifier.Verified, "NONE", "NONE")
+	if err := h.intake.Dispatch("steps"); err == nil {
+		t.Fatal("pharmacy dispatched before equipment")
+	}
+	if err := h.admin.Release("steps"); err == nil {
+		t.Fatal("pending admission released")
+	}
+	if err := h.intake.Reserve("steps"); err != nil {
+		t.Fatal(err)
+	}
+	h.records("steps", facades.PendingC, insuranceverifier.Verified, equipmentreserver.Reserved, "NONE")
+	if h.quantity("equipment") != 1 || h.quantity("pharmacy") != 2 {
+		t.Fatal("incorrect stock after reservation")
+	}
+	if err := h.intake.Reserve("steps"); err == nil {
+		t.Fatal("equipment reserved twice")
+	}
+	if err := h.intake.Dispatch("steps"); err != nil {
+		t.Fatal(err)
+	}
+	h.records("steps", facades.Completed, insuranceverifier.Verified, equipmentreserver.Reserved, pharmacydispatcher.Dispatched)
+	if h.quantity("equipment") != 1 || h.quantity("pharmacy") != 1 {
+		t.Fatal("incorrect stock after dispatch")
+	}
+	if err := h.admin.Release("steps"); err != nil {
+		t.Fatal(err)
+	}
+	h.reopen()
+	h.records("steps", facades.Compensated, insuranceverifier.Reversed, equipmentreserver.Released, pharmacydispatcher.Cancelled)
+	if h.quantity("equipment") != 2 || h.quantity("pharmacy") != 2 {
+		t.Fatal("release did not restore both stocks")
+	}
+	if err := h.admin.Release("steps"); err == nil {
+		t.Fatal("admission released twice")
+	}
+}
+
+func TestResumePartlyReleasedAdmission(t *testing.T) {
+	h := aHospital(t).stock(1, 1)
+	defer h.db.Close()
+	if err := h.admits("partial-release"); err != nil {
+		t.Fatal(err)
+	}
+	if err := h.intake.Gateway.Update("partial-release", facades.Compensating, "admission released"); err != nil {
+		t.Fatal(err)
+	}
+	if err := h.intake.Pharmacy.Cancel("partial-release"); err != nil {
+		t.Fatal(err)
+	}
+	h.reopen()
+	if err := h.intake.Resume("partial-release"); err != nil {
+		t.Fatal(err)
+	}
+	h.records("partial-release", facades.Compensated, insuranceverifier.Reversed, equipmentreserver.Released, pharmacydispatcher.Cancelled)
+	if h.quantity("equipment") != 1 || h.quantity("pharmacy") != 1 {
+		t.Fatal("partial release changed stock twice")
+	}
+}
 func TestEquipmentFailureCompensatesInsurance(t *testing.T) {
 	h := aHospital(t).stock(0, 1)
 	defer h.db.Close()

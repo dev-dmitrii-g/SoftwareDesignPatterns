@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"hospitaladmission/internal/equipmentreserver"
+	"hospitaladmission/internal/insuranceverifier"
 	"hospitaladmission/internal/pharmacydispatcher"
 )
 
@@ -51,11 +53,21 @@ func (f AdminFacade) Compensate(id string) error {
 	if v.Admission.Status == Completed {
 		return errors.New("completed admission cannot be manually compensated")
 	}
-	if v.Pharmacy == pharmacydispatcher.Dispatched {
-		return errors.New("dispatched medicine cannot be manually compensated")
-	}
 	if v.Admission.Status == Compensated {
 		return nil
 	}
 	return f.Intake.compensate(id, "manual compensation")
+}
+func (f AdminFacade) Release(id string) error {
+	v, err := f.Inspect(id)
+	if err != nil {
+		return err
+	}
+	if v.Admission.Status != Completed {
+		return errors.New("only completed admissions can be released")
+	}
+	if v.Insurance != insuranceverifier.Verified || v.Equipment != equipmentreserver.Reserved || v.Pharmacy != pharmacydispatcher.Dispatched {
+		return errors.New("completed admission has incomplete subsystem state")
+	}
+	return f.Intake.compensate(id, "admission released")
 }

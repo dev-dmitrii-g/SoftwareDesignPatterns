@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let selectedId = "";
+let selectedStatus = "";
 
 function showTab(name) {
   for (const tab of ["admissions", "stock"]) {
@@ -148,6 +149,7 @@ function renderStock(items) {
 
 function showView(view) {
   selectedId = view.Admission.ID;
+  selectedStatus = view.Admission.Status;
   $("detail").classList.remove("d-none");
   $("detail-id").textContent = selectedId;
   $("detail-status").replaceChildren(stateBadge(view.Admission.Status));
@@ -156,8 +158,12 @@ function showView(view) {
   $("detail-pharmacy").textContent = view.Pharmacy;
   $("detail-reason").textContent = view.Admission.Reason ? `Reason: ${view.Admission.Reason}` : "";
   $("detail-reason").classList.toggle("d-none", !view.Admission.Reason);
+  $("reserve").disabled = view.Admission.Status !== "PENDING_B";
+  $("dispatch").disabled = view.Admission.Status !== "PENDING_C";
   $("resume").disabled = !["PENDING_A", "PENDING_B", "PENDING_C", "COMPENSATING"].includes(view.Admission.Status);
-  $("compensate").disabled = ["COMPLETED", "COMPENSATED"].includes(view.Admission.Status) || view.Pharmacy === "DISPATCHED";
+  $("resume").textContent = view.Admission.Status === "COMPENSATING" ? "Finish reversal" : "Complete all";
+  $("compensate").disabled = ["COMPLETED", "COMPENSATED"].includes(view.Admission.Status);
+  $("release").disabled = view.Admission.Status !== "COMPLETED";
 }
 
 async function refresh() {
@@ -213,7 +219,10 @@ for (const [formId, kind] of [["equipment-form", "equipment"], ["medicine-form",
     await act("/api/stock", { ...values, kind, quantity: Number(values.quantity) }, "Stock saved");
   });
 }
-$("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, "Admission completed"));
+$("resume").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/resume`, {}, selectedStatus === "COMPENSATING" ? "Compensation completed" : "Admission completed"));
+$("reserve").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/reserve`, {}, "Equipment reserved"));
+$("dispatch").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/dispatch`, {}, "Medicine dispatched"));
 $("compensate").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/compensate`, {}, "Admission compensated"));
+$("release").addEventListener("click", () => act(`/api/admissions/${encodeURIComponent(selectedId)}/release`, {}, "Admission released"));
 $("refresh").addEventListener("click", () => refresh().catch((failure) => notice(failure.message, true)));
 refresh().catch((failure) => notice(failure.message, true));

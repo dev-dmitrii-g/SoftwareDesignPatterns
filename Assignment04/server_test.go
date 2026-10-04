@@ -86,11 +86,23 @@ func TestWebDemo(t *testing.T) {
 	if status, body = post("/api/admissions", request); status != 200 || body["view"].(map[string]any)["Admission"].(map[string]any)["Status"] != facades.PendingB {
 		t.Fatalf("start: %d %+v", status, body)
 	}
-	if status, _ = post("/api/admissions/R1/resume", map[string]any{}); status != 200 {
-		t.Fatalf("resume: %d", status)
+	if status, _ = post("/api/admissions/R1/dispatch", map[string]any{}); status != 422 {
+		t.Fatalf("dispatch before reserve: %d", status)
+	}
+	if status, _ = post("/api/admissions/R1/reserve", map[string]any{}); status != 200 {
+		t.Fatalf("reserve: %d", status)
+	}
+	if status, _ = post("/api/admissions/R1/dispatch", map[string]any{}); status != 200 {
+		t.Fatalf("dispatch: %d", status)
 	}
 	if status, _ = post("/api/admissions/R1/compensate", map[string]any{}); status != 422 {
 		t.Fatalf("compensate completed: %d", status)
+	}
+	if status, body = post("/api/admissions/R1/release", map[string]any{}); status != 200 || body["view"].(map[string]any)["Pharmacy"] != pharmacydispatcher.Cancelled {
+		t.Fatalf("release completed: %d %+v", status, body)
+	}
+	if status, body = get("/api/state"); status != 200 {
+		t.Fatalf("state after release: %d %+v", status, body)
 	}
 	if status, _ = get("/api/admissions/missing"); status != 404 {
 		t.Fatalf("missing admission: %d", status)

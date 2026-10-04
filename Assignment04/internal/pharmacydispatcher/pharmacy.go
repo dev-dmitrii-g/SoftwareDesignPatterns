@@ -67,6 +67,36 @@ func (r Repository) Dispatch(v Dispatch) error {
 	}
 	return tx.Commit()
 }
+func (r Repository) Cancel(v Dispatch) error {
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	res, err := tx.Exec(`UPDATE pharmacy SET status=? WHERE admission_id=? AND status=?`, Cancelled, v.AdmissionID, Dispatched)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return errors.New("dispatch is not active")
+	}
+	res, err = tx.Exec(`UPDATE stock SET quantity=quantity+1 WHERE kind='pharmacy' AND name=?`, v.Medicine)
+	if err != nil {
+		return err
+	}
+	n, err = res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return errors.New("medicine stock is missing")
+	}
+	return tx.Commit()
+}
 
 type Dispatcher struct {
 	Rule       Rule
@@ -82,4 +112,14 @@ func (s Dispatcher) Dispatch(id, medicine string) error {
 		return err
 	}
 	return s.Repository.Dispatch(v)
+}
+func (s Dispatcher) Cancel(id string) error {
+	v, err := s.Repository.Get(id)
+	if err != nil {
+		return err
+	}
+	if err = v.Transition(Cancelled); err != nil {
+		return err
+	}
+	return s.Repository.Cancel(v)
 }

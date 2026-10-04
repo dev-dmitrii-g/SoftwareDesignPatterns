@@ -57,15 +57,15 @@
 
 				<option value="file0">hospitaladmission/internal/equipmentreserver/equipment.go (80.4%)</option>
 
-				<option value="file1">hospitaladmission/internal/facades/admin.go (86.7%)</option>
+				<option value="file1">hospitaladmission/internal/facades/admin.go (86.1%)</option>
 
 				<option value="file2">hospitaladmission/internal/facades/admission.go (88.9%)</option>
 
-				<option value="file3">hospitaladmission/internal/facades/intake.go (77.5%)</option>
+				<option value="file3">hospitaladmission/internal/facades/intake.go (77.0%)</option>
 
 				<option value="file4">hospitaladmission/internal/insuranceverifier/insurance.go (93.3%)</option>
 
-				<option value="file5">hospitaladmission/internal/pharmacydispatcher/pharmacy.go (85.7%)</option>
+				<option value="file5">hospitaladmission/internal/pharmacydispatcher/pharmacy.go (77.4%)</option>
 
 				<option value="file6">hospitaladmission/internal/store/store.go (62.5%)</option>
 
@@ -206,6 +206,8 @@ import (
         "database/sql"
         "errors"
 
+        "hospitaladmission/internal/equipmentreserver"
+        "hospitaladmission/internal/insuranceverifier"
         "hospitaladmission/internal/pharmacydispatcher"
 )
 
@@ -253,13 +255,23 @@ func (f AdminFacade) Compensate(id string) error <span class="cov8" title="1">{
         <span class="cov8" title="1">if v.Admission.Status == Completed </span><span class="cov8" title="1">{
                 return errors.New("completed admission cannot be manually compensated")
         }</span>
-        <span class="cov8" title="1">if v.Pharmacy == pharmacydispatcher.Dispatched </span><span class="cov0" title="0">{
-                return errors.New("dispatched medicine cannot be manually compensated")
-        }</span>
         <span class="cov8" title="1">if v.Admission.Status == Compensated </span><span class="cov8" title="1">{
                 return nil
         }</span>
         <span class="cov8" title="1">return f.Intake.compensate(id, "manual compensation")</span>
+}
+func (f AdminFacade) Release(id string) error <span class="cov8" title="1">{
+        v, err := f.Inspect(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if v.Admission.Status != Completed </span><span class="cov8" title="1">{
+                return errors.New("only completed admissions can be released")
+        }</span>
+        <span class="cov8" title="1">if v.Insurance != insuranceverifier.Verified || v.Equipment != equipmentreserver.Reserved || v.Pharmacy != pharmacydispatcher.Dispatched </span><span class="cov0" title="0">{
+                return errors.New("completed admission has incomplete subsystem state")
+        }</span>
+        <span class="cov8" title="1">return f.Intake.compensate(id, "admission released")</span>
 }
 </pre>
 
@@ -388,6 +400,28 @@ func (f IntakeFacade) Resume(id string) error <span class="cov8" title="1">{
                         return err
                 }</span>
         }
+        <span class="cov8" title="1">if a.Status == PendingA || a.Status == PendingB </span><span class="cov8" title="1">{
+                if err = f.Reserve(id); err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return f.Dispatch(id)</span>
+}
+func (f IntakeFacade) Reserve(id string) error <span class="cov8" title="1">{
+        a, err := f.Gateway.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if a.Status != PendingB </span><span class="cov8" title="1">{
+                return fmt.Errorf("equipment cannot be reserved while admission is %s", a.Status)
+        }</span>
+        <span class="cov8" title="1">i, err := f.Insurance.Repository.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if i.Status != insuranceverifier.Verified </span><span class="cov0" title="0">{
+                return fmt.Errorf("insurance state %s cannot continue", i.Status)
+        }</span>
         <span class="cov8" title="1">v, err := f.Equipment.Repository.Get(id)
         if err == sql.ErrNoRows </span><span class="cov8" title="1">{
                 if err = f.Equipment.Reserve(id, a.Equipment); err != nil </span><span class="cov8" title="1">{
@@ -398,8 +432,22 @@ func (f IntakeFacade) Resume(id string) error <span class="cov8" title="1">{
         }</span> else<span class="cov8" title="1"> if v.Status != equipmentreserver.Reserved </span><span class="cov0" title="0">{
                 return fmt.Errorf("equipment state %s cannot continue", v.Status)
         }</span>
-        <span class="cov8" title="1">if err = f.Gateway.Update(id, PendingC, ""); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">return f.Gateway.Update(id, PendingC, "")</span>
+}
+func (f IntakeFacade) Dispatch(id string) error <span class="cov8" title="1">{
+        a, err := f.Gateway.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
                 return err
+        }</span>
+        <span class="cov8" title="1">if a.Status != PendingC </span><span class="cov8" title="1">{
+                return fmt.Errorf("medicine cannot be dispatched while admission is %s", a.Status)
+        }</span>
+        <span class="cov8" title="1">b, err := f.Equipment.Repository.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if b.Status != equipmentreserver.Reserved </span><span class="cov0" title="0">{
+                return fmt.Errorf("equipment state %s cannot continue", b.Status)
         }</span>
         <span class="cov8" title="1">p, err := f.Pharmacy.Repository.Get(id)
         if err == sql.ErrNoRows </span><span class="cov8" title="1">{
@@ -423,6 +471,15 @@ func (f IntakeFacade) compensate(id, reason string) error <span class="cov8" tit
         if err := f.Gateway.Update(id, Compensating, reason); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
+        <span class="cov8" title="1">p, err := f.Pharmacy.Repository.Get(id)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err == nil &amp;&amp; p.Status == pharmacydispatcher.Dispatched </span><span class="cov8" title="1">{
+                if err = f.Pharmacy.Cancel(id); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
         <span class="cov8" title="1">b, err := f.Equipment.Repository.Get(id)
         if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov0" title="0">{
                 return err
@@ -603,6 +660,36 @@ func (r Repository) Dispatch(v Dispatch) error <span class="cov8" title="1">{
         }</span>
         <span class="cov8" title="1">return tx.Commit()</span>
 }
+func (r Repository) Cancel(v Dispatch) error <span class="cov8" title="1">{
+        tx, err := r.DB.Begin()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">defer tx.Rollback()
+        res, err := tx.Exec(`UPDATE pharmacy SET status=? WHERE admission_id=? AND status=?`, Cancelled, v.AdmissionID, Dispatched)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">n, err := res.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if n != 1 </span><span class="cov0" title="0">{
+                return errors.New("dispatch is not active")
+        }</span>
+        <span class="cov8" title="1">res, err = tx.Exec(`UPDATE stock SET quantity=quantity+1 WHERE kind='pharmacy' AND name=?`, v.Medicine)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">n, err = res.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if n != 1 </span><span class="cov0" title="0">{
+                return errors.New("medicine stock is missing")
+        }</span>
+        <span class="cov8" title="1">return tx.Commit()</span>
+}
 
 type Dispatcher struct {
         Rule       Rule
@@ -618,6 +705,16 @@ func (s Dispatcher) Dispatch(id, medicine string) error <span class="cov8" title
                 return err
         }</span>
         <span class="cov8" title="1">return s.Repository.Dispatch(v)</span>
+}
+func (s Dispatcher) Cancel(id string) error <span class="cov8" title="1">{
+        v, err := s.Repository.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err = v.Transition(Cancelled); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return s.Repository.Cancel(v)</span>
 }
 </pre>
 

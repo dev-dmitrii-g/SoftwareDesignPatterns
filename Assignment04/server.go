@@ -31,8 +31,11 @@ func newServer(db *sql.DB, intake facades.IntakeFacade, admin facades.AdminFacad
 	mux.HandleFunc("POST /api/stock", s.stock)
 	mux.HandleFunc("POST /api/admissions", s.admit)
 	mux.HandleFunc("GET /api/admissions/{id}", s.inspect)
+	mux.HandleFunc("POST /api/admissions/{id}/reserve", s.reserve)
+	mux.HandleFunc("POST /api/admissions/{id}/dispatch", s.dispatch)
 	mux.HandleFunc("POST /api/admissions/{id}/resume", s.resume)
 	mux.HandleFunc("POST /api/admissions/{id}/compensate", s.compensate)
+	mux.HandleFunc("POST /api/admissions/{id}/release", s.release)
 	return mux
 }
 
@@ -220,9 +223,21 @@ func (s webServer) resume(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	s.result(w, id, s.intake.Resume(id))
 }
+func (s webServer) reserve(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	s.result(w, id, s.intake.Reserve(id))
+}
+func (s webServer) dispatch(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	s.result(w, id, s.intake.Dispatch(id))
+}
 func (s webServer) compensate(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	s.result(w, id, s.admin.Compensate(id))
+}
+func (s webServer) release(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	s.result(w, id, s.admin.Release(id))
 }
 func (s webServer) result(w http.ResponseWriter, id string, actionErr error) {
 	v, viewErr := s.admin.Inspect(id)

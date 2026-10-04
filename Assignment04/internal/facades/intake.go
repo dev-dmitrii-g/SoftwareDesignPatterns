@@ -75,6 +75,28 @@ func (f IntakeFacade) Resume(id string) error {
 			return err
 		}
 	}
+	if a.Status == PendingA || a.Status == PendingB {
+		if err = f.Reserve(id); err != nil {
+			return err
+		}
+	}
+	return f.Dispatch(id)
+}
+func (f IntakeFacade) Reserve(id string) error {
+	a, err := f.Gateway.Get(id)
+	if err != nil {
+		return err
+	}
+	if a.Status != PendingB {
+		return fmt.Errorf("equipment cannot be reserved while admission is %s", a.Status)
+	}
+	i, err := f.Insurance.Repository.Get(id)
+	if err != nil {
+		return err
+	}
+	if i.Status != insuranceverifier.Verified {
+		return fmt.Errorf("insurance state %s cannot continue", i.Status)
+	}
 	v, err := f.Equipment.Repository.Get(id)
 	if err == sql.ErrNoRows {
 		if err = f.Equipment.Reserve(id, a.Equipment); err != nil {
@@ -85,8 +107,22 @@ func (f IntakeFacade) Resume(id string) error {
 	} else if v.Status != equipmentreserver.Reserved {
 		return fmt.Errorf("equipment state %s cannot continue", v.Status)
 	}
-	if err = f.Gateway.Update(id, PendingC, ""); err != nil {
+	return f.Gateway.Update(id, PendingC, "")
+}
+func (f IntakeFacade) Dispatch(id string) error {
+	a, err := f.Gateway.Get(id)
+	if err != nil {
 		return err
+	}
+	if a.Status != PendingC {
+		return fmt.Errorf("medicine cannot be dispatched while admission is %s", a.Status)
+	}
+	b, err := f.Equipment.Repository.Get(id)
+	if err != nil {
+		return err
+	}
+	if b.Status != equipmentreserver.Reserved {
+		return fmt.Errorf("equipment state %s cannot continue", b.Status)
 	}
 	p, err := f.Pharmacy.Repository.Get(id)
 	if err == sql.ErrNoRows {
@@ -109,6 +145,15 @@ func (f IntakeFacade) fail(id string, cause error) error {
 func (f IntakeFacade) compensate(id, reason string) error {
 	if err := f.Gateway.Update(id, Compensating, reason); err != nil {
 		return err
+	}
+	p, err := f.Pharmacy.Repository.Get(id)
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+	if err == nil && p.Status == pharmacydispatcher.Dispatched {
+		if err = f.Pharmacy.Cancel(id); err != nil {
+			return err
+		}
 	}
 	b, err := f.Equipment.Repository.Get(id)
 	if err != nil && err != sql.ErrNoRows {
