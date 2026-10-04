@@ -1,34 +1,360 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">
-<style>
-text{font-family:Arial,Helvetica,sans-serif;fill:#17212b} .title{font-size:25px;font-weight:bold}.head{font-size:17px;font-weight:bold}.small{font-size:14px}.box{fill:#f8fbff;stroke:#55718a;stroke-width:2}.sub{fill:#f4f8fb;stroke:#8aa0b2;stroke-width:2}.line{stroke:#55718a;stroke-width:2;fill:none;marker-end:url(#arrow)}
-</style>
-<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 Z" fill="#55718a"/></marker></defs>
-<text x="35" y="43" class="title">Hospital Admission Facade Class Diagram</text>
-<rect x="35" y="80" width="165" height="65" rx="7" class="box"/><text x="55" y="119" class="head">CLI Client</text>
-<rect x="280" y="70" width="240" height="85" rx="7" class="box"/><text x="300" y="101" class="head">IntakeFacade</text><text x="300" y="127" class="small">facades · Start · Admit · Resume</text>
-<rect x="620" y="70" width="245" height="85" rx="7" class="box"/><text x="640" y="101" class="head">AdminFacade</text><text x="640" y="127" class="small">facades · Inspect · Compensate</text>
-<rect x="940" y="70" width="225" height="85" rx="7" class="box"/><text x="960" y="101" class="head">Gateway</text><text x="960" y="127" class="small">admissions progress</text>
-<path d="M200 112 L280 112 M620 112 L520 112 M520 145 L940 145" class="line"/>
-<rect x="35" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="55" y="258" class="head">A  insuranceverifier</text>
-<rect x="58" y="285" width="298" height="65" rx="6" class="box"/><text x="74" y="311" class="head">Verifier</text><text x="74" y="334" class="small">Verify · Reverse</text>
-<rect x="58" y="370" width="298" height="65" rx="6" class="box"/><text x="74" y="397" class="head">Rule</text><text x="74" y="420" class="small">Check IIN and coverage</text>
-<rect x="58" y="455" width="298" height="65" rx="6" class="box"/><text x="74" y="481" class="head">Repository</text><text x="74" y="504" class="small">Save · Get</text>
-<rect x="58" y="540" width="298" height="65" rx="6" class="box"/><text x="74" y="567" class="head">Verification</text><text x="74" y="590" class="small">NEW → VERIFIED → REVERSED</text>
-<rect x="427" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="447" y="258" class="head">B  equipmentreserver</text>
-<rect x="450" y="285" width="298" height="65" rx="6" class="box"/><text x="466" y="311" class="head">Reserver</text><text x="466" y="334" class="small">Reserve · Release</text>
-<rect x="450" y="370" width="298" height="65" rx="6" class="box"/><text x="466" y="397" class="head">Rule</text><text x="466" y="420" class="small">Check item</text>
-<rect x="450" y="455" width="298" height="65" rx="6" class="box"/><text x="466" y="481" class="head">Repository</text><text x="466" y="504" class="small">SetStock · Reserve · Release · Get</text>
-<rect x="450" y="540" width="298" height="65" rx="6" class="box"/><text x="466" y="567" class="head">Reservation</text><text x="466" y="590" class="small">NEW → RESERVED → RELEASED</text>
-<rect x="819" y="225" width="345" height="405" rx="9" class="sub"/>
-<text x="839" y="258" class="head">C  pharmacydispatcher</text>
-<rect x="842" y="285" width="298" height="65" rx="6" class="box"/><text x="858" y="311" class="head">Dispatcher</text><text x="858" y="334" class="small">Dispatch</text>
-<rect x="842" y="370" width="298" height="65" rx="6" class="box"/><text x="858" y="397" class="head">Rule</text><text x="858" y="420" class="small">Check medicine</text>
-<rect x="842" y="455" width="298" height="65" rx="6" class="box"/><text x="858" y="481" class="head">Repository</text><text x="858" y="504" class="small">SetStock · Dispatch · Get</text>
-<rect x="842" y="540" width="298" height="65" rx="6" class="box"/><text x="858" y="567" class="head">Dispatch</text><text x="858" y="590" class="small">NEW → DISPATCHED → CANCELLED</text>
-<path d="M350 155 L190 285 M400 155 L600 285 M470 155 L992 285" class="line"/>
-<path d="M207 350 L207 370 M207 350 L207 455 M207 350 L207 540 M599 350 L599 370 M599 350 L599 455 M599 350 L599 540 M991 350 L991 370 M991 350 L991 455 M991 350 L991 540" class="line"/>
-<rect x="435" y="690" width="330" height="75" rx="8" class="box"/><text x="457" y="721" class="head">SQLite store</text><text x="457" y="745" class="small">insurance · equipment · pharmacy · stock · admissions</text>
-<path d="M207 520 L207 660 L500 690 M599 520 L599 690 M991 520 L991 660 L700 690 M1052 155 L1052 675 L700 690" class="line"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+
+<svg width="1241pt" height="1173pt"
+ viewBox="0.00 0.00 1241.00 1173.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 1151.2)">
+<title>HospitalAdmission</title>
+<polygon fill="white" stroke="none" points="-21.6,21.6 -21.6,-1151.2 1219.6,-1151.2 1219.6,21.6 -21.6,21.6"/>
+<text xml:space="preserve" text-anchor="middle" x="599" y="-1104" font-family="Helvetica,sans-Serif" font-size="24.00" fill="#17324d">Hospital Admission Class Diagram</text>
+<g id="clust1" class="cluster">
+<title>cluster_facades</title>
+<path fill="#f4f9fc" stroke="#b6cddd" d="M20,-181.4C20,-181.4 156,-181.4 156,-181.4 162,-181.4 168,-187.4 168,-193.4 168,-193.4 168,-880.2 168,-880.2 168,-886.2 162,-892.2 156,-892.2 156,-892.2 20,-892.2 20,-892.2 14,-892.2 8,-886.2 8,-880.2 8,-880.2 8,-193.4 8,-193.4 8,-187.4 14,-181.4 20,-181.4"/>
+<text xml:space="preserve" text-anchor="middle" x="88" y="-872" font-family="Helvetica,sans-Serif" font-size="18.00" fill="#17324d">facades</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_insurance</title>
+<path fill="#f4f9fc" stroke="#b6cddd" d="M193,-8C193,-8 440,-8 440,-8 446,-8 452,-14 452,-20 452,-20 452,-490.2 452,-490.2 452,-496.2 446,-502.2 440,-502.2 440,-502.2 193,-502.2 193,-502.2 187,-502.2 181,-496.2 181,-490.2 181,-490.2 181,-20 181,-20 181,-14 187,-8 193,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="316.5" y="-482" font-family="Helvetica,sans-Serif" font-size="18.00" fill="#17324d">A &#160;insuranceverifier</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_equipment</title>
+<path fill="#f4f9fc" stroke="#b6cddd" d="M706,-8C706,-8 912,-8 912,-8 918,-8 924,-14 924,-20 924,-20 924,-490.2 924,-490.2 924,-496.2 918,-502.2 912,-502.2 912,-502.2 706,-502.2 706,-502.2 700,-502.2 694,-496.2 694,-490.2 694,-490.2 694,-20 694,-20 694,-14 700,-8 706,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="809" y="-482" font-family="Helvetica,sans-Serif" font-size="18.00" fill="#17324d">B &#160;equipmentreserver</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_pharmacy</title>
+<path fill="#f4f9fc" stroke="#b6cddd" d="M951,-8C951,-8 1178,-8 1178,-8 1184,-8 1190,-14 1190,-20 1190,-20 1190,-483 1190,-483 1190,-489 1184,-495 1178,-495 1178,-495 951,-495 951,-495 945,-495 939,-489 939,-483 939,-483 939,-20 939,-20 939,-14 945,-8 951,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="1064.5" y="-474.8" font-family="Helvetica,sans-Serif" font-size="18.00" fill="#17324d">C &#160;pharmacydispatcher</text>
+</g>
+
+<g id="node1" class="node">
+<title>WebServer</title>
+<polygon fill="#eaf4ff" stroke="#59758c" points="75.12,-905.1 75.12,-1092.3 214.88,-1092.3 214.88,-905.1 75.12,-905.1"/>
+<text xml:space="preserve" text-anchor="middle" x="145" y="-1074.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">webServer</text>
+<polyline fill="none" stroke="#59758c" points="75.12,-1063.5 214.88,-1063.5"/>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-1045.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">db : *sql.DB</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-1031.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">intake : IntakeFacade</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-1016.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">admin : AdminFacade</text>
+<polyline fill="none" stroke="#59758c" points="75.12,-1005.9 214.88,-1005.9"/>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-987.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">admit()</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-973.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">stock()</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-959.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">state()</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-944.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">inspect()</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-930.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">resume()</text>
+<text xml:space="preserve" text-anchor="start" x="86.64" y="-915.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">compensate()</text>
+</g>
+
+<g id="node2" class="node">
+<title>IntakeFacade</title>
+<polygon fill="#eaf4ff" stroke="#59758c" points="15.79,-529.5 15.79,-702.3 160.21,-702.3 160.21,-529.5 15.79,-529.5"/>
+<text xml:space="preserve" text-anchor="middle" x="88" y="-684.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">IntakeFacade</text>
+<polyline fill="none" stroke="#59758c" points="15.79,-673.5 160.21,-673.5"/>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-655.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Gateway</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-641.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Insurance : Verifier</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-626.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Equipment : Reserver</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-612.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Pharmacy : Dispatcher</text>
+<polyline fill="none" stroke="#59758c" points="15.79,-601.5 160.21,-601.5"/>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-583.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Start()</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-569.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Admit()</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-554.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Resume()</text>
+<text xml:space="preserve" text-anchor="start" x="27.31" y="-540.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">compensate()</text>
+</g>
+
+<g id="edge1" class="edge">
+<title>WebServer&#45;&gt;IntakeFacade</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M167.92,-904.72C169.8,-897.07 171,-892.2 171,-892.2 171,-892.2 171,-752.8 171,-752.8 171,-752.8 159.42,-733.84 144.92,-710.09"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="147.09,-708.96 141.36,-704.26 142.91,-711.51 147.09,-708.96"/>
+</g>
+
+<g id="node3" class="node">
+<title>AdminFacade</title>
+<polygon fill="#eaf4ff" stroke="#59758c" points="16.78,-753.3 16.78,-854.1 155.22,-854.1 155.22,-753.3 16.78,-753.3"/>
+<text xml:space="preserve" text-anchor="middle" x="86" y="-836.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">AdminFacade</text>
+<polyline fill="none" stroke="#59758c" points="16.78,-825.3 155.22,-825.3"/>
+<text xml:space="preserve" text-anchor="start" x="28.3" y="-807.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Intake : IntakeFacade</text>
+<polyline fill="none" stroke="#59758c" points="16.78,-796.5 155.22,-796.5"/>
+<text xml:space="preserve" text-anchor="start" x="28.3" y="-778.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Inspect()</text>
+<text xml:space="preserve" text-anchor="start" x="28.3" y="-764.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Compensate()</text>
+</g>
+
+<g id="edge2" class="edge">
+<title>WebServer&#45;&gt;AdminFacade</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M116.62,-904.87C112.26,-890.62 107.87,-876.25 103.83,-863.02"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="106.19,-862.37 101.8,-856.39 101.51,-863.8 106.19,-862.37"/>
+</g>
+
+<g id="node4" class="node">
+<title>Gateway</title>
+<polygon fill="white" stroke="#59758c" points="42.14,-348.9 42.14,-478.5 131.86,-478.5 131.86,-348.9 42.14,-348.9"/>
+<text xml:space="preserve" text-anchor="middle" x="87" y="-460.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Gateway</text>
+<polyline fill="none" stroke="#59758c" points="42.14,-449.7 131.86,-449.7"/>
+<text xml:space="preserve" text-anchor="start" x="53.66" y="-431.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">DB : *sql.DB</text>
+<polyline fill="none" stroke="#59758c" points="42.14,-420.9 131.86,-420.9"/>
+<text xml:space="preserve" text-anchor="start" x="53.66" y="-402.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Create()</text>
+<text xml:space="preserve" text-anchor="start" x="53.66" y="-388.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Get()</text>
+<text xml:space="preserve" text-anchor="start" x="53.66" y="-374.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">List()</text>
+<text xml:space="preserve" text-anchor="start" x="53.66" y="-359.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Update()</text>
+</g>
+
+<g id="edge4" class="edge">
+<title>IntakeFacade&#45;&gt;Gateway</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M87.57,-529.13C87.5,-515.28 87.43,-501.07 87.36,-487.57"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="89.82,-487.77 87.33,-480.78 84.92,-487.79 89.82,-487.77"/>
+</g>
+
+<g id="node6" class="node">
+<title>Verifier</title>
+<polygon fill="#e5f2ff" stroke="#59758c" points="196.79,-363.3 196.79,-464.1 315.21,-464.1 315.21,-363.3 196.79,-363.3"/>
+<text xml:space="preserve" text-anchor="middle" x="256" y="-446.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Verifier</text>
+<polyline fill="none" stroke="#59758c" points="196.79,-435.3 315.21,-435.3"/>
+<text xml:space="preserve" text-anchor="start" x="208.31" y="-417.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule · Repository</text>
+<polyline fill="none" stroke="#59758c" points="196.79,-406.5 315.21,-406.5"/>
+<text xml:space="preserve" text-anchor="start" x="208.31" y="-388.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Verify()</text>
+<text xml:space="preserve" text-anchor="start" x="208.31" y="-374.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Reverse()</text>
+</g>
+
+<g id="edge5" class="edge">
+<title>IntakeFacade&#45;&gt;Verifier</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M159.98,-529.13C176.48,-509.47 193.61,-489.05 208.75,-471.01"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="210.35,-472.91 212.97,-465.98 206.59,-469.76 210.35,-472.91"/>
+</g>
+
+<g id="node10" class="node">
+<title>Reserver</title>
+<polygon fill="#e5f2ff" stroke="#59758c" points="701.79,-363.3 701.79,-464.1 820.21,-464.1 820.21,-363.3 701.79,-363.3"/>
+<text xml:space="preserve" text-anchor="middle" x="761" y="-446.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Reserver</text>
+<polyline fill="none" stroke="#59758c" points="701.79,-435.3 820.21,-435.3"/>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-417.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule · Repository</text>
+<polyline fill="none" stroke="#59758c" points="701.79,-406.5 820.21,-406.5"/>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-388.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Reserve()</text>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-374.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Release()</text>
+</g>
+
+<g id="edge6" class="edge">
+<title>IntakeFacade&#45;&gt;Reserver</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M160.66,-593.28C291.57,-554.34 565.24,-472.93 692.82,-434.98"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="693.48,-437.34 699.49,-433 692.08,-432.65 693.48,-437.34"/>
+</g>
+
+<g id="node14" class="node">
+<title>Dispatcher</title>
+<polygon fill="#e5f2ff" stroke="#59758c" points="946.79,-370.5 946.79,-456.9 1065.21,-456.9 1065.21,-370.5 946.79,-370.5"/>
+<text xml:space="preserve" text-anchor="middle" x="1006" y="-438.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Dispatcher</text>
+<polyline fill="none" stroke="#59758c" points="946.79,-428.1 1065.21,-428.1"/>
+<text xml:space="preserve" text-anchor="start" x="958.31" y="-410.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule · Repository</text>
+<polyline fill="none" stroke="#59758c" points="946.79,-399.3 1065.21,-399.3"/>
+<text xml:space="preserve" text-anchor="start" x="958.31" y="-381.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Dispatch()</text>
+</g>
+
+<g id="edge7" class="edge">
+<title>IntakeFacade&#45;&gt;Dispatcher</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M160.69,-605.19C365.41,-577.86 932,-502.2 932,-502.2 932,-502.2 947.52,-483.85 964.35,-463.95"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="966.16,-465.6 968.81,-458.67 962.42,-462.43 966.16,-465.6"/>
+</g>
+
+<g id="edge3" class="edge">
+<title>AdminFacade&#45;&gt;IntakeFacade</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M86.54,-752.91C86.67,-740.09 86.83,-725.87 86.98,-711.58"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="89.43,-711.69 87.06,-704.66 84.53,-711.64 89.43,-711.69"/>
+</g>
+
+<g id="node5" class="node">
+<title>Admission</title>
+<polygon fill="white" stroke="#59758c" points="16.12,-189.9 16.12,-276.3 157.88,-276.3 157.88,-189.9 16.12,-189.9"/>
+<text xml:space="preserve" text-anchor="middle" x="87" y="-258.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Admission</text>
+<polyline fill="none" stroke="#59758c" points="16.12,-247.5 157.88,-247.5"/>
+<text xml:space="preserve" text-anchor="start" x="27.64" y="-229.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">ID · IIN · Coverage</text>
+<text xml:space="preserve" text-anchor="start" x="27.64" y="-215.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Equipment · Medicine</text>
+<text xml:space="preserve" text-anchor="start" x="27.64" y="-200.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Status · Reason</text>
+</g>
+
+<g id="edge8" class="edge">
+<title>Gateway&#45;&gt;Admission</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M87,-348.47C87,-327.75 87,-305.06 87,-285.39"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="89.45,-285.56 87,-278.56 84.55,-285.56 89.45,-285.56"/>
+</g>
+
+<g id="node18" class="node">
+<title>SQLite</title>
+<path fill="#e9f5ec" stroke="#60916d" d="M670.23,-99.3C670.23,-103.27 623.07,-106.5 565,-106.5 506.93,-106.5 459.77,-103.27 459.77,-99.3 459.77,-99.3 459.77,-34.5 459.77,-34.5 459.77,-30.53 506.93,-27.3 565,-27.3 623.07,-27.3 670.23,-30.53 670.23,-34.5 670.23,-34.5 670.23,-99.3 670.23,-99.3"/>
+<path fill="none" stroke="#60916d" d="M670.23,-99.3C670.23,-95.33 623.07,-92.1 565,-92.1 506.93,-92.1 459.77,-95.33 459.77,-99.3"/>
+<text xml:space="preserve" text-anchor="middle" x="565" y="-77.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">SQLite</text>
+<text xml:space="preserve" text-anchor="middle" x="565" y="-63.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">insurance · equipment · pharmacy</text>
+<text xml:space="preserve" text-anchor="middle" x="565" y="-48.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">stock · admissions</text>
+</g>
+
+<g id="edge9" class="edge">
+<title>Gateway&#45;&gt;SQLite</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M41.72,-353.21C20.58,-325.43 0,-298.4 0,-298.4 0,-298.4 0,-167.8 0,-167.8 0,-167.8 456,-117.8 456,-117.8 456,-117.8 463.8,-114.23 475.23,-108.99"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="476.09,-111.3 481.44,-106.16 474.05,-106.84 476.09,-111.3"/>
+</g>
+
+<g id="node7" class="node">
+<title>InsuranceRule</title>
+<polygon fill="white" stroke="#59758c" points="189.46,-204.3 189.46,-261.9 322.54,-261.9 322.54,-204.3 189.46,-204.3"/>
+<text xml:space="preserve" text-anchor="middle" x="256" y="-243.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule</text>
+<polyline fill="none" stroke="#59758c" points="189.46,-233.1 322.54,-233.1"/>
+<text xml:space="preserve" text-anchor="start" x="200.98" y="-215.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Check(iin, coverage)</text>
+</g>
+
+<g id="edge10" class="edge">
+<title>Verifier&#45;&gt;InsuranceRule</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M256,-362.95C256,-333.74 256,-297.45 256,-270.84"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="258.45,-271.17 256,-264.17 253.55,-271.17 258.45,-271.17"/>
+</g>
+
+<g id="node8" class="node">
+<title>InsuranceRepository</title>
+<polygon fill="white" stroke="#59758c" points="354.14,-182.7 354.14,-283.5 443.86,-283.5 443.86,-182.7 354.14,-182.7"/>
+<text xml:space="preserve" text-anchor="middle" x="399" y="-265.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Repository</text>
+<polyline fill="none" stroke="#59758c" points="354.14,-254.7 443.86,-254.7"/>
+<text xml:space="preserve" text-anchor="start" x="365.66" y="-236.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">DB : *sql.DB</text>
+<polyline fill="none" stroke="#59758c" points="354.14,-225.9 443.86,-225.9"/>
+<text xml:space="preserve" text-anchor="start" x="365.66" y="-207.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Save()</text>
+<text xml:space="preserve" text-anchor="start" x="365.66" y="-193.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Get()</text>
+</g>
+
+<g id="edge11" class="edge">
+<title>Verifier&#45;&gt;InsuranceRepository</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M295.83,-362.95C313.81,-340.5 335.13,-313.87 353.72,-290.66"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="355.44,-292.42 357.9,-285.43 351.61,-289.36 355.44,-292.42"/>
+</g>
+
+<g id="node9" class="node">
+<title>Verification</title>
+<polygon fill="white" stroke="#59758c" points="222.13,-16.5 222.13,-117.3 427.87,-117.3 427.87,-16.5 222.13,-16.5"/>
+<text xml:space="preserve" text-anchor="middle" x="325" y="-99.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Verification</text>
+<polyline fill="none" stroke="#59758c" points="222.13,-88.5 427.87,-88.5"/>
+<text xml:space="preserve" text-anchor="start" x="233.65" y="-70.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">AdmissionID · IIN</text>
+<text xml:space="preserve" text-anchor="start" x="233.65" y="-56.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Coverage · Status</text>
+<polyline fill="none" stroke="#59758c" points="222.13,-45.3 427.87,-45.3"/>
+<text xml:space="preserve" text-anchor="start" x="233.65" y="-27.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">NEW → VERIFIED → REVERSED</text>
+</g>
+
+<g id="edge12" class="edge">
+<title>InsuranceRepository&#45;&gt;Verification</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M376.6,-182.39C368.52,-164.47 359.34,-144.09 350.98,-125.55"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="353.37,-124.89 348.26,-119.52 348.91,-126.91 353.37,-124.89"/>
+</g>
+
+<g id="edge13" class="edge">
+<title>InsuranceRepository&#45;&gt;SQLite</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M444.36,-187.23C467.71,-164.13 496.11,-136.05 519.48,-112.92"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="520.97,-114.9 524.22,-108.24 517.52,-111.42 520.97,-114.9"/>
+</g>
+
+<g id="node11" class="node">
+<title>EquipmentRule</title>
+<polygon fill="white" stroke="#59758c" points="702.14,-204.3 702.14,-261.9 789.86,-261.9 789.86,-204.3 702.14,-204.3"/>
+<text xml:space="preserve" text-anchor="middle" x="746" y="-243.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule</text>
+<polyline fill="none" stroke="#59758c" points="702.14,-233.1 789.86,-233.1"/>
+<text xml:space="preserve" text-anchor="start" x="713.66" y="-215.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Check(item)</text>
+</g>
+
+<g id="edge14" class="edge">
+<title>Reserver&#45;&gt;EquipmentRule</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M756.82,-362.95C754.37,-333.74 751.32,-297.45 749.09,-270.84"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="751.55,-270.94 748.53,-264.17 746.67,-271.35 751.55,-270.94"/>
+</g>
+
+<g id="node12" class="node">
+<title>EquipmentRepository</title>
+<polygon fill="white" stroke="#59758c" points="822.14,-168.3 822.14,-297.9 911.86,-297.9 911.86,-168.3 822.14,-168.3"/>
+<text xml:space="preserve" text-anchor="middle" x="867" y="-279.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Repository</text>
+<polyline fill="none" stroke="#59758c" points="822.14,-269.1 911.86,-269.1"/>
+<text xml:space="preserve" text-anchor="start" x="833.66" y="-251.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">DB : *sql.DB</text>
+<polyline fill="none" stroke="#59758c" points="822.14,-240.3 911.86,-240.3"/>
+<text xml:space="preserve" text-anchor="start" x="833.66" y="-222.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">SetStock()</text>
+<text xml:space="preserve" text-anchor="start" x="833.66" y="-207.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Reserve()</text>
+<text xml:space="preserve" text-anchor="start" x="833.66" y="-193.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Release()</text>
+<text xml:space="preserve" text-anchor="start" x="833.66" y="-179.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Get()</text>
+</g>
+
+<g id="edge15" class="edge">
+<title>Reserver&#45;&gt;EquipmentRepository</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M790.53,-362.95C801.02,-345.27 813.05,-325 824.41,-305.86"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="826.43,-307.26 827.89,-299.99 822.21,-304.76 826.43,-307.26"/>
+</g>
+
+<g id="node13" class="node">
+<title>Reservation</title>
+<polygon fill="white" stroke="#59758c" points="701.79,-16.5 701.79,-117.3 916.21,-117.3 916.21,-16.5 701.79,-16.5"/>
+<text xml:space="preserve" text-anchor="middle" x="809" y="-99.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Reservation</text>
+<polyline fill="none" stroke="#59758c" points="701.79,-88.5 916.21,-88.5"/>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-70.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">AdmissionID · Item</text>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-56.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Status</text>
+<polyline fill="none" stroke="#59758c" points="701.79,-45.3 916.21,-45.3"/>
+<text xml:space="preserve" text-anchor="start" x="713.31" y="-27.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">NEW → RESERVED → RELEASED</text>
+</g>
+
+<g id="edge16" class="edge">
+<title>EquipmentRepository&#45;&gt;Reservation</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M844.41,-168.15C839.51,-154.28 834.35,-139.68 829.54,-126.05"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="831.89,-125.34 827.25,-119.55 827.27,-126.97 831.89,-125.34"/>
+</g>
+
+<g id="edge17" class="edge">
+<title>EquipmentRepository&#45;&gt;SQLite</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M821.71,-184.36C812.72,-174.89 806,-167.8 806,-167.8 806,-167.8 729.09,-135.92 662.16,-108.18"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="663.28,-105.99 655.87,-105.57 661.4,-110.51 663.28,-105.99"/>
+</g>
+
+<g id="node15" class="node">
+<title>PharmacyRule</title>
+<polygon fill="white" stroke="#59758c" points="947.47,-204.3 947.47,-261.9 1060.53,-261.9 1060.53,-204.3 947.47,-204.3"/>
+<text xml:space="preserve" text-anchor="middle" x="1004" y="-243.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Rule</text>
+<polyline fill="none" stroke="#59758c" points="947.47,-233.1 1060.53,-233.1"/>
+<text xml:space="preserve" text-anchor="start" x="958.99" y="-215.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Check(medicine)</text>
+</g>
+
+<g id="edge18" class="edge">
+<title>Dispatcher&#45;&gt;PharmacyRule</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M1005.53,-370.37C1005.19,-340.22 1004.74,-300.07 1004.42,-271.17"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="1006.87,-271.15 1004.34,-264.18 1001.97,-271.2 1006.87,-271.15"/>
+</g>
+
+<g id="node16" class="node">
+<title>PharmacyRepository</title>
+<polygon fill="white" stroke="#59758c" points="1092.14,-175.5 1092.14,-290.7 1181.86,-290.7 1181.86,-175.5 1092.14,-175.5"/>
+<text xml:space="preserve" text-anchor="middle" x="1137" y="-272.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Repository</text>
+<polyline fill="none" stroke="#59758c" points="1092.14,-261.9 1181.86,-261.9"/>
+<text xml:space="preserve" text-anchor="start" x="1103.66" y="-243.9" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">DB : *sql.DB</text>
+<polyline fill="none" stroke="#59758c" points="1092.14,-233.1 1181.86,-233.1"/>
+<text xml:space="preserve" text-anchor="start" x="1103.66" y="-215.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">SetStock()</text>
+<text xml:space="preserve" text-anchor="start" x="1103.66" y="-200.7" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Dispatch()</text>
+<text xml:space="preserve" text-anchor="start" x="1103.66" y="-186.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Get()</text>
+</g>
+
+<g id="edge19" class="edge">
+<title>Dispatcher&#45;&gt;PharmacyRepository</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M1037.05,-370.37C1052.88,-348.78 1072.48,-322.06 1090.11,-298.02"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="1091.94,-299.67 1094.11,-292.58 1087.99,-296.77 1091.94,-299.67"/>
+</g>
+
+<g id="node17" class="node">
+<title>Dispatch</title>
+<polygon fill="white" stroke="#59758c" points="948.13,-16.5 948.13,-117.3 1181.87,-117.3 1181.87,-16.5 948.13,-16.5"/>
+<text xml:space="preserve" text-anchor="middle" x="1065" y="-99.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Dispatch</text>
+<polyline fill="none" stroke="#59758c" points="948.13,-88.5 1181.87,-88.5"/>
+<text xml:space="preserve" text-anchor="start" x="959.65" y="-70.5" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">AdmissionID · Medicine</text>
+<text xml:space="preserve" text-anchor="start" x="959.65" y="-56.1" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">Status</text>
+<polyline fill="none" stroke="#59758c" points="948.13,-45.3 1181.87,-45.3"/>
+<text xml:space="preserve" text-anchor="start" x="959.65" y="-27.3" font-family="Helvetica,sans-Serif" font-size="12.00" fill="#17324d">NEW → DISPATCHED → CANCELLED</text>
+</g>
+
+<g id="edge20" class="edge">
+<title>PharmacyRepository&#45;&gt;Dispatch</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M1112.02,-175.13C1104.97,-159.05 1097.29,-141.55 1090.23,-125.44"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="1092.66,-124.88 1087.61,-119.45 1088.17,-126.85 1092.66,-124.88"/>
+</g>
+
+<g id="edge21" class="edge">
+<title>PharmacyRepository&#45;&gt;SQLite</title>
+<path fill="none" stroke="#70889b" stroke-width="1.3" d="M1091.83,-183.69C1083.31,-174.56 1077,-167.8 1077,-167.8 1077,-167.8 686,-117.8 686,-117.8 686,-117.8 676.39,-113.84 662.59,-108.15"/>
+<polygon fill="#70889b" stroke="#70889b" stroke-width="1.3" points="663.75,-105.97 656.34,-105.57 661.88,-110.5 663.75,-105.97"/>
+</g>
+</g>
 </svg>
