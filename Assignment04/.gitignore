@@ -2,3 +2,5 @@ hospital.db
 hospital.db-wal
 hospital.db-shm
 *.test
+coverage.out
+coverage.html
