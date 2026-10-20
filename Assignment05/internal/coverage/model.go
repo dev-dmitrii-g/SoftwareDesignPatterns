@@ -20,6 +20,7 @@ type Decision struct {
 type Record struct {
 	GOBMPEligible bool
 	OSMSActive    bool
+	HasReferral   bool
 	DMSExpiresAt  time.Time
 	DMSServices   map[string]bool
 }

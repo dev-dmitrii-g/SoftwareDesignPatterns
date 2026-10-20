@@ -29,6 +29,8 @@ func TestEachCoverageStrategy(t *testing.T) {
 		{"GOBMP other service", GOBMP{fakeSource{record: Record{GOBMPEligible: true}}}, "consultation", false},
 		{"OSMS active", OSMS{fakeSource{record: Record{OSMSActive: true}}}, "consultation", true},
 		{"OSMS inactive", OSMS{fakeSource{record: Record{OSMSActive: false}}}, "consultation", false},
+		{"OSMS rehabilitation referral", OSMS{fakeSource{record: Record{OSMSActive: true, HasReferral: true}}}, "rehabilitation", true},
+		{"OSMS rehabilitation without referral", OSMS{fakeSource{record: Record{OSMSActive: true}}}, "rehabilitation", false},
 		{"DMS covered", DMS{fakeSource{record: Record{DMSExpiresAt: testTime.Add(time.Hour), DMSServices: map[string]bool{"consultation": true}}}}, "consultation", true},
 		{"DMS expired", DMS{fakeSource{record: Record{DMSExpiresAt: testTime.Add(-time.Hour), DMSServices: map[string]bool{"consultation": true}}}}, "consultation", false},
 	}

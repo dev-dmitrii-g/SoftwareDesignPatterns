@@ -30,8 +30,8 @@ func (s OSMS) Check(req Request) (Decision, error) {
 	if err != nil {
 		return Decision{}, err
 	}
-	approved := record.OSMSActive && (req.Service == "consultation" || req.Service == "rehabilitation")
-	reason := "active coverage or service missing"
+	approved := record.OSMSActive && (req.Service == "consultation" || (req.Service == "rehabilitation" && record.HasReferral))
+	reason := "active coverage, service, or referral missing"
 	if approved {
 		reason = "active coverage confirmed"
 	}
