@@ -9,7 +9,7 @@ import (
 
 func sampleAdmission() admission.Admission {
 	return admission.Admission{
-		IIN: "123456789123", Coverage: "OSMS", Service: "consultation",
+		IIN: "123456789123", Service: "consultation",
 		RequestedMedicine: "Activated Charcoal", RequestedEquipment: "IV Stand",
 		ScheduledAt: time.Date(2030, 10, 25, 10, 0, 0, 0, time.UTC),
 	}

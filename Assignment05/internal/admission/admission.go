@@ -7,7 +7,6 @@ import (
 
 type Admission struct {
 	IIN                string
-	Coverage           string
 	Service            string
 	RequestedMedicine  string
 	RequestedEquipment string
@@ -37,8 +36,8 @@ func (a Admission) Validate() error {
 			return errors.New("IIN must contain 12 digits")
 		}
 	}
-	if a.Coverage == "" || a.Service == "" || a.RequestedMedicine == "" || a.RequestedEquipment == "" {
-		return errors.New("coverage, service, medicine, and equipment are required")
+	if a.Service == "" || a.RequestedMedicine == "" || a.RequestedEquipment == "" {
+		return errors.New("service, medicine, and equipment are required")
 	}
 	return nil
 }

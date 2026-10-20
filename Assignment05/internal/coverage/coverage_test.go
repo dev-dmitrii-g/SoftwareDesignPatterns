@@ -53,7 +53,7 @@ func TestAllStrategiesReportProgram(t *testing.T) {
 	for name, candidate := range strategies {
 		t.Run(name, func(t *testing.T) {
 			got, err := candidate.Check(Request{IIN: "123456789123", Service: "consultation", At: testTime})
-			if err != nil || got.Program != name || got.Reason == "" {
+			if err != nil || got.Program != name {
 				t.Fatalf("decision=%+v error=%v", got, err)
 			}
 		})

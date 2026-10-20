@@ -14,7 +14,6 @@ type Request struct {
 type Decision struct {
 	Program  string
 	Approved bool
-	Reason   string
 }
 
 type Record struct {
