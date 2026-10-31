@@ -10,7 +10,7 @@ import (
 )
 
 func TestCLIReports(t *testing.T) {
-	for _, report := range []string{"quality", "alarms", "filter", "json"} {
+	for _, report := range []string{"quality", "alarms", "filter", "json", "latency"} {
 		t.Run(report, func(t *testing.T) {
 			var output bytes.Buffer
 			args := []string{"-samples", "120", "-target", "patient-1", "-report", report}

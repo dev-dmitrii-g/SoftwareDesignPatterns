@@ -66,6 +66,8 @@ func Report(tree Element, name string) (any, error) {
 		return Apply[float64](tree, NewQualityVisitor()), nil
 	case "alarms":
 		return Apply[map[string]int](tree, NewAlarmVisitor()), nil
+	case "latency":
+		return Apply[float64](tree, NewLatencyVisitor()), nil
 	case "filter":
 		names := []string{}
 		for _, element := range Apply[[]Element](tree, NewFilterVisitor(60)) {
@@ -84,7 +86,7 @@ func runCLI(ctx context.Context, args []string, output, progress io.Writer) erro
 	flags.SetOutput(progress)
 	workers := flags.Int("workers", 3, "producer workers (1-8)")
 	samples := flags.Int("samples", 12000, "total samples")
-	report := flags.String("report", "quality", "quality, alarms, filter, json")
+	report := flags.String("report", "quality", "quality, alarms, filter, json, latency")
 	target := flags.String("target", "hospital", "hospital, patient-1, patient-2")
 	bench := flags.Bool("bench", false, "compare 1, 2 and 4 workers")
 	if err := flags.Parse(args); err != nil {
