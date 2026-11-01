@@ -14,13 +14,13 @@ type Subject[E TypedEvent] interface {
 }
 
 type listener[E TypedEvent] struct {
-	id int
+	id       int
 	observer Observer[E]
 }
 
 type Bus[E TypedEvent] struct {
-	mu sync.RWMutex
-	nextID int
+	mu        sync.RWMutex
+	nextID    int
 	listeners map[EventType][]listener[E]
 }
 
