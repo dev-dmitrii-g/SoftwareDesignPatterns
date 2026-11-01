@@ -8,7 +8,7 @@ import (
 
 type Source struct {
 	Subject[Event]
-	channel Channel
+	channel  Channel
 	sequence atomic.Uint64
 }
 
@@ -28,8 +28,12 @@ func (s *Source) Produce(created time.Time, load int) {
 		value = math.Pow((math.Sin(x)+1)/2, 2) + noise
 	case "EEG":
 		value = 0.4*math.Sin(8*x) + 0.2*math.Sin(13*x) + noise
+	case "TEMP":
+		value = 36.6 + 0.2*math.Sin(x/10) + noise
 	}
 	quality := 96 + 3*math.Sin(x)
-	if n%40 < 4 { quality = 45 }
+	if n%40 < 4 {
+		quality = 45
+	}
 	s.Publish(Event{Sample, s.channel.name, s.channel.patient, value, quality, created, load})
 }

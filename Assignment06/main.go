@@ -25,6 +25,7 @@ func NewApp(output io.Writer) *App {
 		{"ecg-1", "patient-1", "ECG"},
 		{"ppg-1", "patient-1", "PPG"},
 		{"eeg-2", "patient-2", "EEG"},
+		{"temp-2", "patient-2", "TEMP"},
 	}
 	store := NewStore(channels)
 	results := NewBus[Event]()
