@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ func TestCLIReports(t *testing.T) {
 		t.Run(report, func(t *testing.T) {
 			var output bytes.Buffer
 			args := []string{"-samples", "120", "-target", "patient-1", "-report", report}
-			if err := runCLI(context.Background(), args, &output, io.Discard); err != nil {
+			if err := RunCLI(context.Background(), args, &output, io.Discard); err != nil {
 				t.Fatal(err)
 			}
 			if !json.Valid(output.Bytes()) {
@@ -38,7 +38,7 @@ func TestCLIRejectsInvalidArguments(t *testing.T) {
 		{"unexpected"},
 	} {
 		t.Run(strings.Join(args, " "), func(t *testing.T) {
-			if err := runCLI(context.Background(), args, io.Discard, io.Discard); err == nil {
+			if err := RunCLI(context.Background(), args, io.Discard, io.Discard); err == nil {
 				t.Fatalf("accepted invalid arguments: %v", args)
 			}
 		})
@@ -47,7 +47,7 @@ func TestCLIRejectsInvalidArguments(t *testing.T) {
 
 func TestCLIPreviewStopsAfterFiveSamples(t *testing.T) {
 	var progress bytes.Buffer
-	if err := runCLI(context.Background(), []string{"-samples", "120"}, io.Discard, &progress); err != nil {
+	if err := RunCLI(context.Background(), []string{"-samples", "120"}, io.Discard, &progress); err != nil {
 		t.Fatal(err)
 	}
 	previewLines := 0

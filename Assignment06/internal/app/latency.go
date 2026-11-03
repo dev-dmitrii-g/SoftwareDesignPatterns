@@ -1,4 +1,4 @@
-package main
+package app
 
 type LatencyVisitor struct {
 	total float64
